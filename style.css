@@ -1,0 +1,44 @@
+body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; }
+#map { height: 100vh; width: 100vw; background: #222; }
+
+#side-panel {
+    position: absolute; top: 10px; left: 10px; z-index: 1000;
+    background: white; width: 360px; max-height: 95vh;
+    border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+
+.tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #eee; }
+.tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: #888; }
+.tab.active { background: white; color: #e67e22; border-bottom: 3px solid #e67e22; }
+.content { padding: 15px; overflow-y: auto; flex-grow: 1; }
+
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+.form-group input, .form-group textarea { 
+    width: 100%; padding: 8px; border: 1px solid #ddd; 
+    border-radius: 6px; box-sizing: border-box; font-family: inherit;
+}
+textarea { resize: vertical; min-height: 80px; }
+
+.btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
+.btn-full { width: 100%; }
+.btn-save { background: #27ae60; color: white; }
+.btn-cancel { background: #eee; color: #666; margin-top: 10px; }
+.ho-bg { background: #27ae60 !important; }
+
+/* Popup styling */
+.popup-container { min-width: 220px; line-height: 1.6; }
+.popup-title { color: #27ae60; font-size: 16px; margin-bottom: 5px; display: block; }
+.popup-note-box { 
+    white-space: pre-wrap; background: #f4f4f4; padding: 8px; 
+    border-radius: 4px; border-left: 4px solid #27ae60; margin-top: 8px; font-size: 13px; 
+}
+
+.stat-bar { background: #fff5eb; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-around; border: 1px solid #ffe0c2; }
+.stat-val { display: block; font-weight: bold; color: #e67e22; font-size: 18px; text-align: center; }
+.search-input { width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #ddd; box-sizing: border-box; margin-bottom: 15px; }
+
+.gps-button { position: absolute; bottom: 20px; right: 20px; z-index: 1000; background: white; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 24px; }
+.handle-dot { width: 16px; height: 16px; background: white; border: 3px solid #e67e22; border-radius: 50%; }
+.user-location-dot { width: 12px; height: 12px; background: #2196F3; border: 2px solid white; border-radius: 50%; }

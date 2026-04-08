@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảo Thuận Maps - Quản Lý Camera & Hộ Dân</title>
+    <link rel="shortcut icon" href="icon/logo.ico" type="image/x-icon">
+    
+    <link rel="stylesheet" href="dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+    <div id="side-panel">
+        <div class="tabs">
+            <div class="tab active" id="tab-btn-add" onclick="showTab('add')">THÊM / SỬA</div>
+            <div class="tab" id="tab-btn-manage" onclick="showTab('manage')">DANH SÁCH</div>
+        </div>
+
+        <div id="panel-add" class="content">
+            <div id="guide-text" class="guide-text">
+                Nhấn vào bản đồ để Thêm | Nhấn ✎ trong Danh sách để Sửa
+            </div>
+            
+            <div id="form-container" style="display:none;">
+                <input type="hidden" id="edit-id">
+                
+                <div id="form-cam" style="display:none;">
+                    <h3 class="form-title cam-color">Cấu hình Camera</h3>
+                    <div class="form-group"><label>Tên camera:</label><input type="text" id="in-cam-name"></div>
+                    <div class="form-group">
+                        <label>Hướng xoay: <span id="val-h" class="val-highlight">90</span>°</label>
+                        <input type="range" id="in-cam-h" min="0" max="360" value="90" oninput="liveUpdate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Góc quét: <span id="val-a" class="val-highlight">90</span>°</label>
+                        <input type="range" id="in-cam-a" min="10" max="180" value="90" oninput="liveUpdate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tầm xa: <span id="val-r" class="val-highlight">60</span>m</label>
+                        <input type="range" id="in-cam-r" min="5" max="500" value="60" oninput="liveUpdate()">
+                    </div>
+                    <button class="btn btn-save btn-full" onclick="finalSave('camera')">LƯU CẬP NHẬT</button>
+                </div>
+
+                <div id="form-ho" style="display:none;">
+                    <h3 class="form-title ho-color">Thông tin Hộ Dân</h3>
+                    <div class="form-group"><label>Tên chủ hộ:</label><input type="text" id="in-ho-name"></div>
+                    <div class="form-group"><label>Số điện thoại:</label><input type="text" id="in-ho-phone"></div>
+                    <div class="form-group"><label>Địa chỉ:</label><input type="text" id="in-ho-addr"></div>
+                    <div class="form-group"><label>Ghi chú (có thể xuống dòng):</label>
+                        <textarea id="in-ho-note" rows="5"></textarea>
+                    </div>
+                    <button class="btn btn-save btn-full ho-bg" onclick="finalSave('household')">LƯU HỘ DÂN</button>
+                </div>
+                
+                <button class="btn btn-cancel btn-full" onclick="cancelAdd()">HỦY BỎ</button>
+            </div>
+        </div>
+
+        <div id="panel-manage" class="content" style="display:none;">
+            <div class="stat-bar">
+                <div class="stat-item"><span id="stat-cam" class="stat-val">0</span><span class="stat-label">Camera</span></div>
+                <div class="stat-item"><span id="stat-ho" class="stat-val">0</span><span class="stat-label">Hộ Dân</span></div>
+            </div>
+            <input type="text" id="search-q" class="search-input" placeholder="Tìm tên, SĐT, địa chỉ, ghi chú..." oninput="refreshList()">
+            <div id="list-body"></div>
+            <div class="export-section">
+                <button class="btn btn-export btn-full excel-bg" onclick="exportExcel()">📊 XUẤT FILE EXCEL</button>
+                <button class="btn btn-export btn-full word-bg" onclick="exportWord()">📄 XUẤT BÁO CÁO WORD</button>
+                <button class="btn btn-export btn-full backup-bg" onclick="exportJSON()">💾 SAO LƯU (JSON)</button>
+                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI DỮ LIỆU</button>
+                <input type="file" id="file-restore" style="display:none" accept=".json" onchange="importJSON(event)">
+            </div>
+        </div>
+    </div>
+
+    <div class="gps-button" onclick="locateUser(true)">🎯</div>
+    <div id="map"></div>
+
+    <script src="dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
