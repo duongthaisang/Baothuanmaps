@@ -1,32 +1,63 @@
+// --- CẤU HÌNH BAN ĐẦU ---
 const defaultPos = [11.610961926975536, 108.11585590451305];
 let data = JSON.parse(localStorage.getItem('bt_data')) || { cams: [], hos: [] };
 let tempPos = null, previewLayer = null, handleMarker = null, userMarker = null;
 
-const map = L.map('map', { center: defaultPos, zoom: 18, maxZoom: 22 });
-L.tileLayer('./baothuan_tiles/baothuan_tiles/{z}/{x}/{y}.jpg', { maxZoom: 22, maxNativeZoom: 18 }).addTo(map);
+// Khởi tạo bản đồ
+const map = L.map('map', { 
+    center: defaultPos, 
+    zoom: 18, 
+    minZoom: 3, 
+    maxZoom: 22 
+});
+
+// --- LỚP BẢN ĐỒ (TILE LAYERS) ---
+
+// 1. Bản đồ vệ tinh trực tuyến (Dự phòng khi zoom xa hoặc thiếu ảnh offline)
+const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    maxZoom: 22,
+    subdomains:['mt0','mt1','mt2','mt3'],
+    attribution: '© Google'
+}).addTo(map);
+
+// 2. Bản đồ Offline Bảo Thuận (Ưu tiên hiển thị đè lên trên)
+// LƯU Ý: Kiểm tra file ảnh của bạn là .jpg hay .png để sửa đuôi file dưới đây cho đúng
+const offlineLayer = L.tileLayer('baothuan_tiles/{z}/{x}/{y}.jpg', { 
+    maxZoom: 22, 
+    maxNativeZoom: 18, // Lấy ảnh mức 18 để phóng to cho các mức 19-22
+    minZoom: 1,
+    noWrap: true,
+    opacity: 1.0 // Độ đậm nhạt của bản đồ offline
+}).addTo(map);
+
 const layers = L.layerGroup().addTo(map);
 
+// --- HÀM ĐỊNH VỊ (GPS) ---
 function locateUser(zoomIn = false) {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
         if (userMarker) userMarker.setLatLng([lat, lng]);
-        else userMarker = L.marker([lat, lng], { icon: L.divIcon({ className: 'user-location-dot', iconSize: [12, 12] }) }).addTo(map);
+        else userMarker = L.marker([lat, lng], { 
+            icon: L.divIcon({ className: 'user-location-dot', iconSize: [12, 12] }) 
+        }).addTo(map);
         if (zoomIn) map.flyTo([lat, lng], 19);
     }, null, { enableHighAccuracy: true });
 }
 
+// --- XỬ LÝ SỰ KIỆN CLICK ---
 map.on('click', (e) => {
     if (handleMarker) return;
     tempPos = e.latlng;
     L.popup().setLatLng(tempPos).setContent(`
-        <div style="text-align:center;">
-            <button class="btn btn-save" style="background:#e67e22; margin-bottom:5px;" onclick="startAdd('camera')">THÊM CAMERA</button><br>
-            <button class="btn btn-save ho-bg" onclick="startAdd('household')">THÊM HỘ DÂN</button>
+        <div style="text-align:center; padding: 5px;">
+            <button class="btn btn-save" style="background:#e67e22; width: 120px; margin-bottom:8px;" onclick="startAdd('camera')">THÊM CAMERA</button><br>
+            <button class="btn btn-save ho-bg" style="width: 120px;" onclick="startAdd('household')">THÊM HỘ DÂN</button>
         </div>
     `).openOn(map);
 });
 
+// --- QUẢN LÝ FORM & DỮ LIỆU ---
 function startAdd(type, editId = null) {
     showTab('add');
     document.getElementById('guide-text').style.display = 'none';
@@ -59,7 +90,11 @@ function initHandle() {
     const r = parseInt(document.getElementById('in-cam-r').value);
     const h = parseInt(document.getElementById('in-cam-h').value);
     const p = calculateEndPoint(tempPos.lat, tempPos.lng, h, r);
-    handleMarker = L.marker([p.lat, p.lng], { draggable: true, icon: L.divIcon({ className: '', html: '<div class="handle-dot"></div>', iconSize: [16, 16] }) }).addTo(map);
+    handleMarker = L.marker([p.lat, p.lng], { 
+        draggable: true, 
+        icon: L.divIcon({ className: '', html: '<div class="handle-dot"></div>', iconSize: [16, 16] }) 
+    }).addTo(map);
+    
     handleMarker.on('drag', (e) => {
         document.getElementById('in-cam-r').value = Math.round(map.distance(tempPos, e.target.getLatLng()));
         liveUpdate(false);
@@ -101,6 +136,7 @@ function finalSave(type) {
     cancelAdd();
 }
 
+// --- HIỂN THỊ POPUP ---
 function renderAll() {
     layers.clearLayers();
     data.cams.forEach(c => {
@@ -124,6 +160,7 @@ function renderAll() {
     refreshList();
 }
 
+// --- TÌM KIẾM ---
 function refreshList() {
     const q = document.getElementById('search-q').value.toLowerCase();
     const listBody = document.getElementById('list-body');
@@ -145,11 +182,10 @@ function refreshList() {
 
 function createRow(type, item) {
     const div = document.createElement('div'); div.className = 'item-row';
-    div.style = "padding:10px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:10px;";
     div.innerHTML = `
         <div style="flex-grow:1; cursor:pointer;" onclick="map.flyTo([${item.lat}, ${item.lng}], 20)">
             <div style="font-weight:bold;">${item.name}</div>
-            <div style="font-size:11px; color:#999;">${type==='camera'?'Hướng: '+item.h+'°':'SĐT: '+(item.phone||'N/A')}</div>
+            <div style="font-size:11px; color:#999;">${type==='camera'?'Góc: '+item.h+'°':'SĐT: '+(item.phone||'N/A')}</div>
         </div>
         <button class="btn-action btn-edit" onclick="startAdd('${type}', ${item.id})">✎</button>
         <button class="btn-action btn-del" onclick="deleteItem('${type}', ${item.id})">🗑</button>
@@ -158,19 +194,21 @@ function createRow(type, item) {
 }
 
 function deleteItem(type, id) {
-    if (confirm("Xác nhận xóa mục này?")) {
+    if (confirm("Xóa mục này?")) {
         if (type === 'camera') data.cams = data.cams.filter(c => c.id !== id);
         else data.hos = data.hos.filter(h => h.id !== id);
         saveData();
     }
 }
 
+// --- TIỆN ÍCH ---
 function saveData() { localStorage.setItem('bt_data', JSON.stringify(data)); renderAll(); }
 function showTab(t) {
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-btn-'+t).classList.add('active');
     document.getElementById('panel-add').style.display = t==='add'?'block':'none';
     document.getElementById('panel-manage').style.display = t==='manage'?'block':'none';
+    if(t==='manage') refreshList();
 }
 function cancelAdd() {
     document.getElementById('form-container').style.display = 'none';
@@ -196,28 +234,26 @@ function calculateEndPoint(lat, lng, brng, dist) {
     return { lat: l2 * 180 / Math.PI, lng: ln2 * 180 / Math.PI };
 }
 
-// Các hàm xuất file (giữ nguyên logic cũ nhưng gọn hơn)
+// --- NHẬP XUẤT ---
 function exportExcel() {
     let csv = "\ufeffLoại,Tên,SĐT,Địa chỉ,Ghi chú,Lat,Lng\n";
-    data.hos.forEach(h => csv += `Hộ Dân,${h.name},${h.phone},"${h.addr}","${h.note.replace(/\n/g, ' ')}",${h.lat},${h.lng}\n`);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "bao_thuan.csv"; a.click();
+    data.hos.forEach(h => csv += `Hộ Dân,${h.name},${h.phone},"${h.addr}","${(h.note||'').replace(/\n/g, ' ')}",${h.lat},${h.lng}\n`);
+    downloadFile(csv, "bao_thuan.csv", "text/csv;charset=utf-8;");
 }
-
-function exportJSON() {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "data_backup.json"; a.click();
-}
-
+function exportJSON() { downloadFile(JSON.stringify(data, null, 2), "data_backup.json", "application/json"); }
 function importJSON(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
             const imported = JSON.parse(e.target.result);
-            if (imported.cams && imported.hos) { data = imported; saveData(); alert("Phục hồi thành công!"); }
-        } catch(err) { alert("File không hợp lệ!"); }
+            if (imported.cams && imported.hos) { data = imported; saveData(); alert("Xong!"); }
+        } catch(err) { alert("Lỗi!"); }
     };
     reader.readAsText(event.target.files[0]);
+}
+function downloadFile(content, fileName, type) {
+    const blob = new Blob([content], { type });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName; a.click();
 }
 
 renderAll();
