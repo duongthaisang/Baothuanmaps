@@ -1,44 +1,108 @@
-body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; }
-#map { height: 100vh; width: 100vw; background: #222; }
+/* --- CẤU HÌNH CHUNG --- */
+body, html { 
+    margin: 0; padding: 0; height: 100%; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    background: #1a1a1a; overflow: hidden; 
+}
 
+#map { height: 100vh; width: 100vw; background: #222; z-index: 1; }
+
+/* --- SIDE PANEL (BẢNG ĐIỀU KHIỂN) --- */
 #side-panel {
-    position: absolute; top: 10px; left: 10px; z-index: 1000;
-    background: white; width: 360px; max-height: 95vh;
-    border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.4);
-    display: flex; flex-direction: column; overflow: hidden;
+    position: absolute; top: 15px; left: 15px; z-index: 1000;
+    background: rgba(255, 255, 255, 0.95); 
+    width: 340px; max-height: 90vh;
+    border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; 
+    overflow: hidden; backdrop-filter: blur(10px);
 }
 
-.tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #eee; }
-.tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; color: #888; }
+/* Tabs */
+.tabs { display: flex; background: #f1f3f5; border-bottom: 1px solid #ddd; }
+.tab { 
+    flex: 1; padding: 16px 10px; text-align: center; cursor: pointer; 
+    font-weight: bold; color: #adb5bd; transition: 0.3s; font-size: 14px;
+}
 .tab.active { background: white; color: #e67e22; border-bottom: 3px solid #e67e22; }
-.content { padding: 15px; overflow-y: auto; flex-grow: 1; }
 
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+/* Content Area */
+.content { padding: 15px; overflow-y: auto; flex-grow: 1; scrollbar-width: thin; }
+
+/* --- FORM NHẬP LIỆU --- */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #495057; }
 .form-group input, .form-group textarea { 
-    width: 100%; padding: 8px; border: 1px solid #ddd; 
-    border-radius: 6px; box-sizing: border-box; font-family: inherit;
+    width: 100%; padding: 10px; border: 1px solid #ced4da; 
+    border-radius: 8px; box-sizing: border-box; font-size: 14px;
 }
-textarea { resize: vertical; min-height: 80px; }
+textarea { resize: none; min-height: 100px; }
 
-.btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
-.btn-full { width: 100%; }
+/* Nút bấm */
+.btn { 
+    padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
+    font-weight: bold; font-size: 14px; transition: 0.2s; 
+}
+.btn-full { width: 100%; margin-top: 10px; }
 .btn-save { background: #27ae60; color: white; }
-.btn-cancel { background: #eee; color: #666; margin-top: 10px; }
+.btn-cancel { background: #e9ecef; color: #495057; }
 .ho-bg { background: #27ae60 !important; }
 
-/* Popup styling */
-.popup-container { min-width: 220px; line-height: 1.6; }
-.popup-title { color: #27ae60; font-size: 16px; margin-bottom: 5px; display: block; }
-.popup-note-box { 
-    white-space: pre-wrap; background: #f4f4f4; padding: 8px; 
-    border-radius: 4px; border-left: 4px solid #27ae60; margin-top: 8px; font-size: 13px; 
+/* --- DANH SÁCH (DÀNH CHO HÌNH BẠN GỬI) --- */
+.list-header { 
+    background: #f8f9fa; padding: 8px 12px; font-size: 11px; 
+    font-weight: bold; color: #868e96; border-radius: 6px; 
+    margin: 15px 0 10px 0; text-transform: uppercase; letter-spacing: 1px;
 }
 
-.stat-bar { background: #fff5eb; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-around; border: 1px solid #ffe0c2; }
-.stat-val { display: block; font-weight: bold; color: #e67e22; font-size: 18px; text-align: center; }
-.search-input { width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #ddd; box-sizing: border-box; margin-bottom: 15px; }
+.item-row { 
+    padding: 12px; border-bottom: 1px solid #f1f3f5; 
+    display: flex; align-items: center; gap: 10px;
+    background: white; border-radius: 8px; margin-bottom: 5px;
+}
+.item-row:hover { background: #fff8f1; }
 
-.gps-button { position: absolute; bottom: 20px; right: 20px; z-index: 1000; background: white; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 24px; }
-.handle-dot { width: 16px; height: 16px; background: white; border: 3px solid #e67e22; border-radius: 50%; }
-.user-location-dot { width: 12px; height: 12px; background: #2196F3; border: 2px solid white; border-radius: 50%; }
+.item-info { flex-grow: 1; cursor: pointer; }
+.item-name { font-weight: bold; font-size: 15px; color: #212529; margin-bottom: 2px; }
+.item-sub { font-size: 12px; color: #adb5bd; }
+
+/* Nút hành động trong danh sách */
+.btn-action { 
+    border: none; width: 32px; height: 32px; border-radius: 6px; 
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.btn-edit { background: #e7f5ff; color: #228be6; }
+.btn-del { background: #fff5f5; color: #fa5252; }
+
+/* --- STAT BAR --- */
+.stat-bar { 
+    background: #fff5eb; padding: 12px; border-radius: 12px; 
+    margin-bottom: 15px; display: flex; justify-content: space-around; 
+    border: 1px solid #ffe0c2; 
+}
+.stat-item { text-align: center; }
+.stat-val { display: block; font-weight: bold; color: #e67e22; font-size: 20px; }
+.stat-label { font-size: 11px; color: #fd7e14; font-weight: bold; }
+
+.search-input { 
+    width: 100%; padding: 12px 15px; border-radius: 25px; 
+    border: 1px solid #dee2e6; box-sizing: border-box; margin-bottom: 15px;
+    outline: none; transition: 0.3s;
+}
+.search-input:focus { border-color: #e67e22; box-shadow: 0 0 0 3px rgba(230,126,34,0.1); }
+
+/* --- POPUP & GPS --- */
+.popup-container { min-width: 200px; padding: 5px; }
+.popup-note-box { 
+    white-space: pre-wrap; background: #f8f9fa; padding: 10px; 
+    border-radius: 8px; border-left: 4px solid #27ae60; margin-top: 10px; font-size: 13px; 
+}
+.gps-button { 
+    position: absolute; bottom: 30px; right: 20px; z-index: 1000; 
+    background: white; width: 55px; height: 55px; border-radius: 50%; 
+    display: flex; justify-content: center; align-items: center; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; font-size: 24px; 
+}
+.user-location-dot { 
+    width: 14px; height: 14px; background: #007bff; 
+    border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px #007bff;
+}
