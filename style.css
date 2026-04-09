@@ -17,6 +17,9 @@ body, html {
     overflow: hidden; backdrop-filter: blur(10px);
 }
 
+/* Ẩn thanh kéo trên giao diện máy tính */
+.drag-handle { display: none; }
+
 /* Tabs */
 .tabs { display: flex; background: #f1f3f5; border-bottom: 1px solid #ddd; }
 .tab { 
@@ -31,14 +34,12 @@ body, html {
 /* --- FORM NHẬP LIỆU --- */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #495057; }
-/* ĐÃ TĂNG FONT-SIZE LÊN 16PX ĐỂ CHỐNG LỖI ZOOM TRÊN ĐIỆN THOẠI */
 .form-group input, .form-group textarea { 
     width: 100%; padding: 10px; border: 1px solid #ced4da; 
     border-radius: 8px; box-sizing: border-box; font-size: 16px; 
 }
 textarea { resize: none; min-height: 100px; }
 
-/* Nút bấm */
 .btn { 
     padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
     font-weight: bold; font-size: 14px; transition: 0.2s; 
@@ -54,19 +55,16 @@ textarea { resize: none; min-height: 100px; }
     font-weight: bold; color: #868e96; border-radius: 6px; 
     margin: 15px 0 10px 0; text-transform: uppercase; letter-spacing: 1px;
 }
-
 .item-row { 
     padding: 12px; border-bottom: 1px solid #f1f3f5; 
     display: flex; align-items: center; gap: 10px;
     background: white; border-radius: 8px; margin-bottom: 5px;
 }
 .item-row:hover { background: #fff8f1; }
-
 .item-info { flex-grow: 1; cursor: pointer; }
 .item-name { font-weight: bold; font-size: 15px; color: #212529; margin-bottom: 2px; }
 .item-sub { font-size: 12px; color: #adb5bd; }
 
-/* Nút hành động trong danh sách */
 .btn-action { 
     border: none; width: 32px; height: 32px; border-radius: 6px; 
     cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -127,18 +125,45 @@ textarea { resize: none; min-height: 100px; }
 }
 #login-pwd:focus { border-color: #e67e22; outline: none; }
 
-/* --- TỐI ƯU GIAO DIỆN CHO ĐIỆN THOẠI (MOBILE) --- */
+/* --- TỐI ƯU GIAO DIỆN & VUỐT CHO ĐIỆN THOẠI --- */
 @media (max-width: 768px) {
     #side-panel {
-        width: calc(100vw - 20px) !important;
-        left: 10px !important;
+        width: 100vw !important; /* Dài kín chiều ngang */
+        left: 0 !important;
         top: auto !important; 
-        bottom: 10px !important; 
-        max-height: 45vh !important; 
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.2) !important; 
+        bottom: 0 !important; /* Ghim xuống đáy */
+        border-radius: 20px 20px 0 0 !important; /* Bo tròn góc trên */
+        height: 45vh; /* Chiều cao mặc định */
+        max-height: 90vh !important; 
+        box-shadow: 0 -10px 25px rgba(0,0,0,0.15) !important; 
+        transition: height 0.3s ease-out; /* Mượt mà khi buông tay */
     }
+    
+    /* Hiển thị và trang trí thanh kéo */
+    .drag-handle {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 30px;
+        width: 100%;
+        cursor: grab;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px 20px 0 0;
+        border-bottom: 1px solid #f1f3f5;
+        flex-shrink: 0;
+    }
+    .drag-handle::after {
+        content: '';
+        width: 45px;
+        height: 5px;
+        background: #cbd5e1;
+        border-radius: 5px;
+    }
+    
+    /* Đồng bộ vị trí nút GPS */
     .gps-button {
         bottom: calc(45vh + 20px) !important; 
-        right: 10px !important;
+        right: 15px !important;
+        transition: bottom 0.3s ease-out;
     }
 }
