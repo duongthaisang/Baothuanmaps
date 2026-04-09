@@ -1,33 +1,47 @@
+// --- BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
+// Lưu ý: Đây chỉ là khóa giao diện, không an toàn tuyệt đối.
+const Mật_Khẩu_Của_Bạn = "767679"; // Đổi số này thành mã bạn muốn
+
+function checkLogin() {
+    const input = document.getElementById('login-pwd').value;
+    if (input === Mật_Khẩu_Của_Bạn) {
+        document.getElementById('login-overlay').style.display = 'none';
+    } else {
+        document.getElementById('login-err').style.display = 'block';
+    }
+}
+
+function handleLoginEnter(e) {
+    if (e.key === 'Enter') checkLogin();
+}
+
+// Hàm làm sạch dữ liệu nhập vào (Chống XSS)
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.toString().replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag])
+    );
+}
+
 // --- CẤU HÌNH BAN ĐẦU ---
 const defaultPos = [11.610961926975536, 108.11585590451305];
 let data = JSON.parse(localStorage.getItem('bt_data')) || { cams: [], hos: [] };
 let tempPos = null, previewLayer = null, handleMarker = null, userMarker = null;
 
-// Khởi tạo bản đồ
-const map = L.map('map', { 
-    center: defaultPos, 
-    zoom: 18, 
-    minZoom: 3, 
-    maxZoom: 22 
-});
+const map = L.map('map', { center: defaultPos, zoom: 18, minZoom: 3, maxZoom: 22 });
 
-// --- LỚP BẢN ĐỒ (TILE LAYERS) ---
-
-// 1. Bản đồ vệ tinh trực tuyến (Dự phòng khi zoom xa hoặc thiếu ảnh offline)
 const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-    maxZoom: 22,
-    subdomains:['mt0','mt1','mt2','mt3'],
-    attribution: '© Google'
+    maxZoom: 22, subdomains:['mt0','mt1','mt2','mt3'], attribution: '© Google'
 }).addTo(map);
 
-// 2. Bản đồ Offline Bảo Thuận (Ưu tiên hiển thị đè lên trên)
-// LƯU Ý: Kiểm tra file ảnh của bạn là .jpg hay .png để sửa đuôi file dưới đây cho đúng
 const offlineLayer = L.tileLayer('baothuan_tiles/{z}/{x}/{y}.jpg', { 
-    maxZoom: 22, 
-    maxNativeZoom: 18, // Lấy ảnh mức 18 để phóng to cho các mức 19-22
-    minZoom: 1,
-    noWrap: true,
-    opacity: 1.0 // Độ đậm nhạt của bản đồ offline
+    maxZoom: 22, maxNativeZoom: 18, minZoom: 1, noWrap: true, opacity: 1.0 
 }).addTo(map);
 
 const layers = L.layerGroup().addTo(map);
@@ -142,16 +156,16 @@ function renderAll() {
     data.cams.forEach(c => {
         drawFOV(c.lat, c.lng, c.h, c.a || 90, c.r, '#e67e22').addTo(layers);
         L.circleMarker([c.lat, c.lng], { radius: 6, color: '#e67e22', fillOpacity: 1, weight: 2 }).addTo(layers)
-        .bindPopup(`<b>📸 ${c.name}</b><br>Hướng: ${c.h}° | Tầm xa: ${c.r}m<br><button class="btn btn-save btn-full" style="margin-top:8px" onclick="startAdd('camera', ${c.id})">SỬA</button>`);
+        .bindPopup(`<b>📸 ${escapeHTML(c.name)}</b><br>Hướng: ${c.h}° | Tầm xa: ${c.r}m<br><button class="btn btn-save btn-full" style="margin-top:8px" onclick="startAdd('camera', ${c.id})">SỬA</button>`);
     });
     data.hos.forEach(h => {
         const content = `
             <div class="popup-container">
-                <b class="popup-title">🏠 ${h.name}</b>
-                <b>📞 SĐT:</b> ${h.phone || 'N/A'}<br>
-                <b>📍 Địa chỉ:</b> ${h.addr || 'N/A'}<br>
+                <b class="popup-title">🏠 ${escapeHTML(h.name)}</b><br>
+                <b>📞 SĐT:</b> ${escapeHTML(h.phone) || 'N/A'}<br>
+                <b>📍 Địa chỉ:</b> ${escapeHTML(h.addr) || 'N/A'}<br>
                 <b>📝 Ghi chú:</b>
-                <div class="popup-note-box">${h.note || 'Không có ghi chú.'}</div>
+                <div class="popup-note-box">${escapeHTML(h.note) || 'Không có ghi chú.'}</div>
                 <button class="btn btn-save btn-full ho-bg" style="margin-top:10px" onclick="startAdd('household', ${h.id})">SỬA HỘ DÂN</button>
             </div>
         `;
@@ -184,8 +198,8 @@ function createRow(type, item) {
     const div = document.createElement('div'); div.className = 'item-row';
     div.innerHTML = `
         <div style="flex-grow:1; cursor:pointer;" onclick="map.flyTo([${item.lat}, ${item.lng}], 20)">
-            <div style="font-weight:bold;">${item.name}</div>
-            <div style="font-size:11px; color:#999;">${type==='camera'?'Góc: '+item.h+'°':'SĐT: '+(item.phone||'N/A')}</div>
+            <div style="font-weight:bold;">${escapeHTML(item.name)}</div>
+            <div style="font-size:11px; color:#999;">${type==='camera'?'Góc: '+item.h+'°':'SĐT: '+escapeHTML(item.phone||'N/A')}</div>
         </div>
         <button class="btn-action btn-edit" onclick="startAdd('${type}', ${item.id})">✎</button>
         <button class="btn-action btn-del" onclick="deleteItem('${type}', ${item.id})">🗑</button>
@@ -237,9 +251,15 @@ function calculateEndPoint(lat, lng, brng, dist) {
 // --- NHẬP XUẤT ---
 function exportExcel() {
     let csv = "\ufeffLoại,Tên,SĐT,Địa chỉ,Ghi chú,Lat,Lng\n";
-    data.hos.forEach(h => csv += `Hộ Dân,${h.name},${h.phone},"${h.addr}","${(h.note||'').replace(/\n/g, ' ')}",${h.lat},${h.lng}\n`);
+    data.hos.forEach(h => csv += `Hộ Dân,${escapeHTML(h.name)},${escapeHTML(h.phone)},"${escapeHTML(h.addr)}","${escapeHTML((h.note||'').replace(/\n/g, ' '))}",${h.lat},${h.lng}\n`);
     downloadFile(csv, "bao_thuan.csv", "text/csv;charset=utf-8;");
 }
+
+function exportWord() {
+    // Khởi tạo tính năng báo cáo Word (Mock)
+    alert("Tính năng Xuất Báo Cáo Word đang được hoàn thiện. Dữ liệu hiện có: " + data.hos.length + " Hộ dân.");
+}
+
 function exportJSON() { downloadFile(JSON.stringify(data, null, 2), "data_backup.json", "application/json"); }
 function importJSON(event) {
     const reader = new FileReader();
