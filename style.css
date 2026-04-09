@@ -142,3 +142,20 @@ textarea { resize: none; min-height: 100px; }
     text-align: center; font-size: 16px; letter-spacing: 2px;
 }
 #login-pwd:focus { border-color: #e67e22; outline: none; }
+/* --- TỐI ƯU GIAO DIỆN CHO ĐIỆN THOẠI (MOBILE) --- */
+@media (max-width: 768px) {
+    #side-panel {
+        width: calc(100vw - 20px) !important;
+        left: 10px !important;
+        top: auto !important; /* Hủy ghim ở trên cùng */
+        bottom: 10px !important; /* Ghim bảng xuống dưới đáy màn hình */
+        max-height: 45vh !important; /* Chỉ chiếm 45% chiều cao màn hình để chừa chỗ cho bản đồ */
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.2) !important; /* Đổi hướng bóng đổ lên trên */
+    }
+    
+    /* Đẩy nút định vị GPS lên cao hơn để không bị cái bảng che khuất */
+    .gps-button {
+        bottom: calc(45vh + 20px) !important; 
+        right: 10px !important;
+    }
+}
