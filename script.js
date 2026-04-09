@@ -1,5 +1,5 @@
 // --- BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
-const Mật_Khẩu_Của_Bạn = "767679"; 
+const Mật_Khẩu_Của_Bạn = "123456"; 
 
 function checkLogin() {
     const input = document.getElementById('login-pwd').value;
@@ -14,7 +14,6 @@ function handleLoginEnter(e) {
     if (e.key === 'Enter') checkLogin();
 }
 
-// Hàm làm sạch dữ liệu nhập vào (Chống XSS)
 function escapeHTML(str) {
     if (!str) return '';
     return str.toString().replace(/[&<>'"]/g, 
@@ -28,6 +27,9 @@ let data = JSON.parse(localStorage.getItem('bt_data')) || { cams: [], hos: [] };
 let tempPos = null, previewLayer = null, handleMarker = null, userMarker = null;
 
 const map = L.map('map', { center: defaultPos, zoom: 18, minZoom: 3, maxZoom: 22 });
+
+// THÊM BẢN QUYỀN TÁC GIẢ
+map.attributionControl.addAttribution('<b style="color:#e67e22;">Made by Dương Thái Sang</b>');
 
 const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 22, subdomains:['mt0','mt1','mt2','mt3'], attribution: '© Google'
@@ -74,7 +76,6 @@ function startAdd(type, editId = null) {
     document.getElementById('form-ho').style.display = (type === 'household' ? 'block' : 'none');
     
     if (editId) {
-        // NẾU LÀ CHẾ ĐỘ SỬA: Điền dữ liệu cũ vào
         const item = type === 'camera' ? data.cams.find(c => c.id == editId) : data.hos.find(h => h.id == editId);
         tempPos = { lat: item.lat, lng: item.lng };
         if (type === 'camera') {
@@ -89,7 +90,6 @@ function startAdd(type, editId = null) {
             document.getElementById('in-ho-note').value = item.note || "";
         }
     } else {
-        // NẾU LÀ CHẾ ĐỘ THÊM MỚI: Làm sạch form
         if (type === 'camera') {
             document.getElementById('in-cam-name').value = "";
             document.getElementById('in-cam-h').value = 90;
@@ -158,7 +158,6 @@ function finalSave(type) {
     cancelAdd();
 }
 
-// --- HIỂN THỊ POPUP ---
 function renderAll() {
     layers.clearLayers();
     data.cams.forEach(c => {
@@ -182,7 +181,6 @@ function renderAll() {
     refreshList();
 }
 
-// --- TÌM KIẾM ---
 function refreshList() {
     const q = document.getElementById('search-q').value.toLowerCase();
     const listBody = document.getElementById('list-body');
@@ -223,7 +221,6 @@ function deleteItem(type, id) {
     }
 }
 
-// --- TIỆN ÍCH ---
 function saveData() { localStorage.setItem('bt_data', JSON.stringify(data)); renderAll(); }
 function showTab(t) {
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -256,7 +253,6 @@ function calculateEndPoint(lat, lng, brng, dist) {
     return { lat: l2 * 180 / Math.PI, lng: ln2 * 180 / Math.PI };
 }
 
-// --- NHẬP XUẤT ---
 function exportExcel() {
     let csv = "\ufeffLoại,Tên,SĐT,Địa chỉ,Ghi chú,Lat,Lng\n";
     data.hos.forEach(h => csv += `Hộ Dân,${escapeHTML(h.name)},${escapeHTML(h.phone)},"${escapeHTML(h.addr)}","${escapeHTML((h.note||'').replace(/\n/g, ' '))}",${h.lat},${h.lng}\n`);
@@ -281,10 +277,61 @@ function downloadFile(content, fileName, type) {
 
 renderAll();
 
-// ÉP TRÌNH DUYỆT TỰ ĐỘNG NHẢY VÀO Ô MẬT KHẨU KHI TẢI TRANG XONG
 window.onload = function() {
     setTimeout(() => {
         const pwdInput = document.getElementById('login-pwd');
         if(pwdInput) pwdInput.focus();
     }, 100);
 };
+
+// --- LOGIC VUỐT BOTTOM SHEET (CHỈ CHẠY TRÊN MOBILE) ---
+const sidePanel = document.getElementById('side-panel');
+const dragHandle = document.getElementById('drag-handle');
+const gpsBtn = document.querySelector('.gps-button');
+let startY = 0;
+let currentHeight = 0;
+let isDragging = false;
+
+dragHandle.addEventListener('touchstart', (e) => {
+    if (window.innerWidth > 768) return; // Bỏ qua nếu là giao diện máy tính
+    startY = e.touches[0].clientY;
+    currentHeight = sidePanel.getBoundingClientRect().height;
+    sidePanel.style.transition = 'none'; // Tắt hiệu ứng mượt để ngón tay vuốt không bị lag
+    if(gpsBtn) gpsBtn.style.transition = 'none';
+    isDragging = true;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const deltaY = e.touches[0].clientY - startY;
+    let newHeight = currentHeight - deltaY;
+    const vh = window.innerHeight;
+    
+    // Giới hạn chiều cao kéo từ 15% đến 85% màn hình
+    if (newHeight < vh * 0.15) newHeight = vh * 0.15;
+    if (newHeight > vh * 0.85) newHeight = vh * 0.85;
+    
+    sidePanel.style.height = newHeight + 'px';
+    if(gpsBtn) gpsBtn.style.bottom = (newHeight + 20) + 'px'; // Đẩy nút GPS lên theo bảng
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    // Bật lại hiệu ứng mượt
+    sidePanel.style.transition = 'height 0.3s ease-out';
+    if(gpsBtn) gpsBtn.style.transition = 'bottom 0.3s ease-out';
+    
+    const finalHeight = sidePanel.getBoundingClientRect().height;
+    const vh = window.innerHeight;
+    const percentage = finalHeight / vh;
+    
+    // Tự động "hút" (snap) vào 3 vị trí
+    let snapHeight = '45vh'; // Mặc định ở giữa
+    if (percentage < 0.3) snapHeight = '15vh'; // Thu gọn xuống dưới
+    else if (percentage > 0.6) snapHeight = '85vh'; // Phóng to lên trên
+
+    sidePanel.style.height = snapHeight;
+    if(gpsBtn) gpsBtn.style.bottom = `calc(${snapHeight} + 20px)`;
+});
