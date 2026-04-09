@@ -1,5 +1,5 @@
 // --- BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
-const Mật_Khẩu_Của_Bạn = "123456"; 
+const Mật_Khẩu_Của_Bạn = "767679"; 
 
 function checkLogin() {
     const input = document.getElementById('login-pwd').value;
