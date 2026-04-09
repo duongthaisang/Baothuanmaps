@@ -31,9 +31,10 @@ body, html {
 /* --- FORM NHẬP LIỆU --- */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #495057; }
+/* ĐÃ TĂNG FONT-SIZE LÊN 16PX ĐỂ CHỐNG LỖI ZOOM TRÊN ĐIỆN THOẠI */
 .form-group input, .form-group textarea { 
     width: 100%; padding: 10px; border: 1px solid #ced4da; 
-    border-radius: 8px; box-sizing: border-box; font-size: 14px;
+    border-radius: 8px; box-sizing: border-box; font-size: 16px; 
 }
 textarea { resize: none; min-height: 100px; }
 
@@ -47,7 +48,7 @@ textarea { resize: none; min-height: 100px; }
 .btn-cancel { background: #e9ecef; color: #495057; }
 .ho-bg { background: #27ae60 !important; }
 
-/* --- DANH SÁCH (DÀNH CHO HÌNH BẠN GỬI) --- */
+/* --- DANH SÁCH --- */
 .list-header { 
     background: #f8f9fa; padding: 8px 12px; font-size: 11px; 
     font-weight: bold; color: #868e96; border-radius: 6px; 
@@ -86,7 +87,7 @@ textarea { resize: none; min-height: 100px; }
 .search-input { 
     width: 100%; padding: 12px 15px; border-radius: 25px; 
     border: 1px solid #dee2e6; box-sizing: border-box; margin-bottom: 15px;
-    outline: none; transition: 0.3s;
+    outline: none; transition: 0.3s; font-size: 16px;
 }
 .search-input:focus { border-color: #e67e22; box-shadow: 0 0 0 3px rgba(230,126,34,0.1); }
 
@@ -106,6 +107,7 @@ textarea { resize: none; min-height: 100px; }
     width: 14px; height: 14px; background: #007bff; 
     border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px #007bff;
 }
+
 /* --- OVERLAY ĐĂNG NHẬP --- */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -124,36 +126,17 @@ textarea { resize: none; min-height: 100px; }
     text-align: center; font-size: 16px; letter-spacing: 2px;
 }
 #login-pwd:focus { border-color: #e67e22; outline: none; }
-/* --- OVERLAY ĐĂNG NHẬP --- */
-#login-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(30, 30, 30, 0.95); z-index: 9999;
-    display: flex; justify-content: center; align-items: center;
-    backdrop-filter: blur(5px);
-}
-.login-box {
-    background: white; padding: 30px; border-radius: 16px;
-    width: 300px; text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-}
-#login-pwd {
-    width: 100%; padding: 12px; border: 1px solid #ced4da;
-    border-radius: 8px; box-sizing: border-box; margin: 15px 0;
-    text-align: center; font-size: 16px; letter-spacing: 2px;
-}
-#login-pwd:focus { border-color: #e67e22; outline: none; }
+
 /* --- TỐI ƯU GIAO DIỆN CHO ĐIỆN THOẠI (MOBILE) --- */
 @media (max-width: 768px) {
     #side-panel {
         width: calc(100vw - 20px) !important;
         left: 10px !important;
-        top: auto !important; /* Hủy ghim ở trên cùng */
-        bottom: 10px !important; /* Ghim bảng xuống dưới đáy màn hình */
-        max-height: 45vh !important; /* Chỉ chiếm 45% chiều cao màn hình để chừa chỗ cho bản đồ */
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.2) !important; /* Đổi hướng bóng đổ lên trên */
+        top: auto !important; 
+        bottom: 10px !important; 
+        max-height: 45vh !important; 
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.2) !important; 
     }
-    
-    /* Đẩy nút định vị GPS lên cao hơn để không bị cái bảng che khuất */
     .gps-button {
         bottom: calc(45vh + 20px) !important; 
         right: 10px !important;
