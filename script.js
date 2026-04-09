@@ -1,6 +1,5 @@
 // --- BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
-// Lưu ý: Đây chỉ là khóa giao diện, không an toàn tuyệt đối.
-const Mật_Khẩu_Của_Bạn = "767679"; // Đổi số này thành mã bạn muốn
+const Mật_Khẩu_Của_Bạn = "767679"; 
 
 function checkLogin() {
     const input = document.getElementById('login-pwd').value;
@@ -19,13 +18,7 @@ function handleLoginEnter(e) {
 function escapeHTML(str) {
     if (!str) return '';
     return str.toString().replace(/[&<>'"]/g, 
-        tag => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            "'": '&#39;',
-            '"': '&quot;'
-        }[tag])
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
     );
 }
 
@@ -81,6 +74,7 @@ function startAdd(type, editId = null) {
     document.getElementById('form-ho').style.display = (type === 'household' ? 'block' : 'none');
     
     if (editId) {
+        // NẾU LÀ CHẾ ĐỘ SỬA: Điền dữ liệu cũ vào
         const item = type === 'camera' ? data.cams.find(c => c.id == editId) : data.hos.find(h => h.id == editId);
         tempPos = { lat: item.lat, lng: item.lng };
         if (type === 'camera') {
@@ -94,7 +88,21 @@ function startAdd(type, editId = null) {
             document.getElementById('in-ho-addr').value = item.addr || "";
             document.getElementById('in-ho-note').value = item.note || "";
         }
+    } else {
+        // NẾU LÀ CHẾ ĐỘ THÊM MỚI: Làm sạch form
+        if (type === 'camera') {
+            document.getElementById('in-cam-name').value = "";
+            document.getElementById('in-cam-h').value = 90;
+            document.getElementById('in-cam-a').value = 90;
+            document.getElementById('in-cam-r').value = 60;
+        } else {
+            document.getElementById('in-ho-name').value = "";
+            document.getElementById('in-ho-phone').value = "";
+            document.getElementById('in-ho-addr').value = "";
+            document.getElementById('in-ho-note').value = "";
+        }
     }
+
     if (type === 'camera') { initHandle(); liveUpdate(); }
     map.closePopup();
 }
@@ -254,12 +262,7 @@ function exportExcel() {
     data.hos.forEach(h => csv += `Hộ Dân,${escapeHTML(h.name)},${escapeHTML(h.phone)},"${escapeHTML(h.addr)}","${escapeHTML((h.note||'').replace(/\n/g, ' '))}",${h.lat},${h.lng}\n`);
     downloadFile(csv, "bao_thuan.csv", "text/csv;charset=utf-8;");
 }
-
-function exportWord() {
-    // Khởi tạo tính năng báo cáo Word (Mock)
-    alert("Tính năng Xuất Báo Cáo Word đang được hoàn thiện. Dữ liệu hiện có: " + data.hos.length + " Hộ dân.");
-}
-
+function exportWord() { alert("Tính năng Xuất Báo Cáo Word đang được hoàn thiện."); }
 function exportJSON() { downloadFile(JSON.stringify(data, null, 2), "data_backup.json", "application/json"); }
 function importJSON(event) {
     const reader = new FileReader();
@@ -277,3 +280,11 @@ function downloadFile(content, fileName, type) {
 }
 
 renderAll();
+
+// ÉP TRÌNH DUYỆT TỰ ĐỘNG NHẢY VÀO Ô MẬT KHẨU KHI TẢI TRANG XONG
+window.onload = function() {
+    setTimeout(() => {
+        const pwdInput = document.getElementById('login-pwd');
+        if(pwdInput) pwdInput.focus();
+    }, 100);
+};
