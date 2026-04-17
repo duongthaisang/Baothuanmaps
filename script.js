@@ -1,4 +1,6 @@
-// --- BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
+// ==========================================
+// --- 1. BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
+// ==========================================
 const Mật_Khẩu_Của_Bạn = "767679"; 
 
 function checkLogin() {
@@ -9,59 +11,76 @@ function checkLogin() {
     }
 }
 function handleLoginEnter(e) { if (e.key === 'Enter') checkLogin(); }
+
+// Chống XSS (Bảo mật khi render text)
 function escapeHTML(str) {
     if (!str) return '';
     return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 
-// --- CẤU HÌNH BẢN ĐỒ ---
+// ==========================================
+// --- 2. CẤU HÌNH BẢN ĐỒ & BIẾN TOÀN CỤC ---
+// ==========================================
 const defaultPos = [11.610961926975536, 108.11585590451305];
 let data = JSON.parse(localStorage.getItem('bt_data')) || { cams: [], hos: [] };
 let tempPos = null, previewLayer = null, handleMarker = null, userMarker = null;
 
-// Lưu trữ object Marker để Popup có thể mở từ xa
+// Lưu trữ object Marker để Popup có thể mở từ xa bằng code
 const markerRefs = { cams: {}, hos: {} };
 
 const map = L.map('map', { center: defaultPos, zoom: 18, minZoom: 3, maxZoom: 22, zoomControl: false });
-L.control.zoom({ position: 'topright' }).addTo(map); // Dời nút zoom qua phải để nhường thanh Search
+L.control.zoom({ position: 'topright' }).addTo(map); // Dời nút zoom qua phải nhường chỗ cho thanh Search
 
 map.attributionControl.addAttribution('<b style="color:#e67e22;">Made by Dương Thái Sang</b>');
 
+// Layer bản đồ vệ tinh Google
 const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 22, subdomains:['mt0','mt1','mt2','mt3']
 }).addTo(map);
 
+// Layer nhóm để dễ dàng xóa/vẽ lại marker
 const layers = L.layerGroup().addTo(map);
 
-// --- HÀM TẠO LINK GOOGLE MAPS ---
+// ==========================================
+// --- 3. CÁC HÀM TIỆN ÍCH (GPS, CHỈ ĐƯỜNG) ---
+// ==========================================
 function getNavUrl(lat, lng) {
     // Chuyển hướng sang app/web Google Maps
-    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    return `http://maps.google.com/maps?daddr=${lat},${lng}&amp;ll=`;
 }
 
 function locateUser(zoomIn = false) {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+        alert("Trình duyệt của bạn không hỗ trợ định vị GPS!");
+        return;
+    }
     navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
         if (userMarker) userMarker.setLatLng([lat, lng]);
-        else userMarker = L.marker([lat, lng], { icon: L.divIcon({ className: 'user-location-dot', iconSize: [12, 12] }) }).addTo(map);
+        else userMarker = L.marker([lat, lng], { 
+            icon: L.divIcon({ className: 'user-location-dot', iconSize: [14, 14] }) 
+        }).addTo(map);
+        
         if (zoomIn) map.flyTo([lat, lng], 19);
-    }, null, { enableHighAccuracy: true });
+    }, (err) => {
+        alert("Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí trên máy bạn.");
+    }, { enableHighAccuracy: true });
 }
 
-// --- SỰ KIỆN BẢN ĐỒ ---
+// ==========================================
+// --- 4. TƯƠNG TÁC BẢN ĐỒ & FORM NHẬP LIỆU ---
+// ==========================================
 map.on('click', (e) => {
-    if (handleMarker) return;
+    if (handleMarker) return; // Đang chỉnh góc cam thì không cho mở popup
     tempPos = e.latlng;
     L.popup().setLatLng(tempPos).setContent(`
         <div style="text-align:center; padding: 5px;">
-            <button class="btn btn-save" style="background:#e67e22; width: 130px; margin-bottom:8px;" onclick="startAdd('camera')">📸 THÊM CAMERA</button><br>
-            <button class="btn btn-save ho-bg" style="width: 130px;" onclick="startAdd('household')">🏠 THÊM HỘ DÂN</button>
+            <button class="btn btn-save" style="background:#e67e22; width: 140px; margin-bottom:8px;" onclick="startAdd('camera')">📸 THÊM CAMERA</button><br>
+            <button class="btn btn-save ho-bg" style="width: 140px;" onclick="startAdd('household')">🏠 THÊM HỘ DÂN</button>
         </div>
     `).openOn(map);
 });
 
-// --- THÊM / SỬA DỮ LIỆU ---
 function startAdd(type, editId = null) {
     showTab('add');
     document.getElementById('guide-text').style.display = 'none';
@@ -70,9 +89,12 @@ function startAdd(type, editId = null) {
     document.getElementById('form-cam').style.display = (type === 'camera' ? 'block' : 'none');
     document.getElementById('form-ho').style.display = (type === 'household' ? 'block' : 'none');
     
-    // TỐI ƯU MOBILE: Chống che khuất bản đồ
+    // TỐI ƯU MOBILE: Chống che khuất bản đồ khi bật Form
     if (window.innerWidth <= 768 && tempPos) {
-        document.getElementById('side-panel').style.height = '45vh'; // Cố định bảng điều khiển
+        const sidePanel = document.getElementById('side-panel');
+        sidePanel.style.height = '45vh'; // Cố định bảng điều khiển
+        if(document.querySelector('.gps-button')) document.querySelector('.gps-button').style.bottom = 'calc(45vh + 20px)';
+        
         // Dịch bản đồ xuống một chút để điểm đang thêm nằm ở nửa trên
         setTimeout(() => {
             map.flyTo([tempPos.lat, tempPos.lng], 19, { animate: true });
@@ -106,11 +128,15 @@ function startAdd(type, editId = null) {
     map.closePopup();
 }
 
+// Xử lý kéo thả Marker để chỉnh tầm xa Camera
 function initHandle() {
     if (handleMarker) map.removeLayer(handleMarker);
     const r = parseInt(document.getElementById('in-cam-r').value), h = parseInt(document.getElementById('in-cam-h').value);
     const p = calculateEndPoint(tempPos.lat, tempPos.lng, h, r);
-    handleMarker = L.marker([p.lat, p.lng], { draggable: true, icon: L.divIcon({ html: '<div style="width:16px;height:16px;background:white;border:3px solid #e67e22;border-radius:50%"></div>', iconSize: [16,16] }) }).addTo(map);
+    handleMarker = L.marker([p.lat, p.lng], { 
+        draggable: true, 
+        icon: L.divIcon({ html: '<div style="width:16px;height:16px;background:white;border:3px solid #e67e22;border-radius:50%"></div>', iconSize: [16,16] }) 
+    }).addTo(map);
     
     handleMarker.on('drag', (e) => {
         document.getElementById('in-cam-r').value = Math.round(map.distance(tempPos, e.target.getLatLng()));
@@ -147,6 +173,17 @@ function finalSave(type) {
     saveData(); cancelAdd();
 }
 
+function cancelAdd() {
+    document.getElementById('form-container').style.display = 'none';
+    document.getElementById('guide-text').style.display = 'block';
+    if (handleMarker) map.removeLayer(handleMarker);
+    if (previewLayer) map.removeLayer(previewLayer);
+    tempPos = null; handleMarker = null;
+}
+
+// ==========================================
+// --- 5. RENDER DỮ LIỆU & POPUP CHÍNH ---
+// ==========================================
 function renderAll() {
     layers.clearLayers(); markerRefs.cams = {}; markerRefs.hos = {};
     
@@ -154,9 +191,12 @@ function renderAll() {
         drawFOV(c.lat, c.lng, c.h, c.a || 90, c.r, '#e67e22').addTo(layers);
         const marker = L.circleMarker([c.lat, c.lng], { radius: 6, color: '#e67e22', fillOpacity: 1, weight: 2 }).addTo(layers);
         marker.bindPopup(`
-            <b>📸 ${escapeHTML(c.name)}</b><br>Hướng: ${c.h}° | Tầm xa: ${c.r}m
-            <a href="${getNavUrl(c.lat, c.lng)}" target="_blank" class="btn btn-nav btn-full">🗺️ ĐI ĐẾN ĐÂY</a>
-            <button class="btn btn-save btn-full" style="margin-top:8px" onclick="startAdd('camera', ${c.id})">SỬA</button>
+            <div class="popup-container">
+                <b class="popup-title">📸 ${escapeHTML(c.name)}</b><br>
+                <b>Hướng:</b> ${c.h}° | <b>Tầm xa:</b> ${c.r}m
+                <a href="${getNavUrl(c.lat, c.lng)}" target="_blank" class="btn btn-nav btn-full">🗺️ ĐI ĐẾN ĐÂY</a>
+                <button class="btn btn-save btn-full" onclick="startAdd('camera', ${c.id})">SỬA CAMERA</button>
+            </div>
         `);
         markerRefs.cams[c.id] = marker;
     });
@@ -170,7 +210,7 @@ function renderAll() {
                 <b>📍 Địa chỉ:</b> ${escapeHTML(h.addr) || 'N/A'}<br>
                 <b>📝 Ghi chú:</b> <div class="popup-note-box">${escapeHTML(h.note) || 'Không có ghi chú.'}</div>
                 <a href="${getNavUrl(h.lat, h.lng)}" target="_blank" class="btn btn-nav btn-full">🗺️ ĐI ĐẾN ĐÂY</a>
-                <button class="btn btn-save btn-full ho-bg" style="margin-top:8px" onclick="startAdd('household', ${h.id})">SỬA HỘ DÂN</button>
+                <button class="btn btn-save btn-full ho-bg" onclick="startAdd('household', ${h.id})">SỬA HỘ DÂN</button>
             </div>
         `);
         markerRefs.hos[h.id] = marker;
@@ -178,7 +218,9 @@ function renderAll() {
     refreshList();
 }
 
-// --- TÌM KIẾM THEO KIỂU GOOGLE MAPS ---
+// ==========================================
+// --- 6. TÌM KIẾM THEO KIỂU GOOGLE MAPS ---
+// ==========================================
 function handleTopSearch() {
     const q = document.getElementById('main-search').value.toLowerCase().trim();
     const dropdown = document.getElementById('search-results-dropdown');
@@ -195,16 +237,12 @@ function handleTopSearch() {
     if (results.length === 0) {
         dropdown.innerHTML = '<div class="search-item" style="color:#999;text-align:center">Không tìm thấy kết quả</div>';
     } else {
-        // Hiển thị tối đa 10 kết quả gần nhất
+        // Giới hạn hiển thị 10 kết quả
         results.slice(0, 10).forEach(item => {
             const div = document.createElement('div'); div.className = 'search-item';
             div.innerHTML = `<strong>${item.type==='cam'?'📸':'🏠'} ${escapeHTML(item.name)}</strong><br><small style="color:#666">${item.type==='cam'?'Mục Camera':'Mục Hộ Dân'} ${item.phone?' - '+item.phone:''}</small>`;
             div.onclick = () => {
-                map.flyTo([item.lat, item.lng], 20);
-                setTimeout(() => {
-                    if (item.type === 'cam' && markerRefs.cams[item.id]) markerRefs.cams[item.id].openPopup();
-                    if (item.type === 'ho' && markerRefs.hos[item.id]) markerRefs.hos[item.id].openPopup();
-                }, 400); // Đợi zoom xong thì mở popup
+                focusItem(item.type === 'cam' ? 'camera' : 'household', item.id, item.lat, item.lng);
                 dropdown.style.display = 'none';
                 document.getElementById('main-search').value = item.name;
             };
@@ -220,13 +258,16 @@ function clearSearch() {
     document.querySelector('.clear-search').style.display = 'none';
 }
 
-// Ẩn search dropdown khi bấm ra ngoài
+// Ẩn dropdown khi click ra ngoài vùng search
 document.addEventListener('click', (e) => {
     if (!document.getElementById('top-search-bar').contains(e.target)) {
         document.getElementById('search-results-dropdown').style.display = 'none';
     }
 });
 
+// ==========================================
+// --- 7. QUẢN LÝ DANH SÁCH BÊN TRONG BẢNG ---
+// ==========================================
 function refreshList() {
     const listBody = document.getElementById('list-body'); listBody.innerHTML = '';
     document.getElementById('stat-cam').innerText = data.cams.length;
@@ -242,7 +283,7 @@ function refreshList() {
 function createRow(type, item) {
     const div = document.createElement('div'); div.className = 'item-row';
     div.innerHTML = `
-        <div class="item-info" onclick="map.flyTo([${item.lat}, ${item.lng}], 20); showTab('add'); cancelAdd();">
+        <div class="item-info" onclick="focusItem('${type}', ${item.id}, ${item.lat}, ${item.lng})">
             <div style="font-weight:bold;">${escapeHTML(item.name)}</div>
             <div style="font-size:11px; color:#999;">${type==='camera'?'Góc: '+item.h+'°':'SĐT: '+escapeHTML(item.phone||'N/A')}</div>
         </div>
@@ -253,29 +294,49 @@ function createRow(type, item) {
     return div;
 }
 
+// HÀM BAY ĐẾN & TỰ ĐỘNG MỞ POPUP (Tối ưu Mobile)
+function focusItem(type, id, lat, lng) {
+    // 1. Bay đến vị trí
+    map.flyTo([lat, lng], 20);
+    
+    // 2. Thu gọn bảng điều khiển nếu đang ở mobile để không che bản đồ
+    if (window.innerWidth <= 768) {
+        const sidePanel = document.getElementById('side-panel');
+        const gpsBtn = document.querySelector('.gps-button');
+        sidePanel.style.height = '15vh';
+        if (gpsBtn) gpsBtn.style.bottom = 'calc(15vh + 20px)';
+    }
+
+    // 3. Đợi bay xong (400ms) thì bật Popup
+    setTimeout(() => {
+        if (type === 'camera' && markerRefs.cams[id]) markerRefs.cams[id].openPopup();
+        if (type === 'household' && markerRefs.hos[id]) markerRefs.hos[id].openPopup();
+    }, 400); 
+}
+
 function deleteItem(type, id) {
-    if (confirm("Xóa mục này?")) {
+    if (confirm("Xóa mục này khỏi bản đồ?")) {
         if (type === 'camera') data.cams = data.cams.filter(c => c.id !== id);
         else data.hos = data.hos.filter(h => h.id !== id);
         saveData();
     }
 }
 
-function saveData() { localStorage.setItem('bt_data', JSON.stringify(data)); renderAll(); }
+function saveData() { 
+    localStorage.setItem('bt_data', JSON.stringify(data)); 
+    renderAll(); 
+}
+
 function showTab(t) {
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-btn-'+t).classList.add('active');
     document.getElementById('panel-add').style.display = t==='add'?'block':'none';
     document.getElementById('panel-manage').style.display = t==='manage'?'block':'none';
 }
-function cancelAdd() {
-    document.getElementById('form-container').style.display = 'none';
-    document.getElementById('guide-text').style.display = 'block';
-    if (handleMarker) map.removeLayer(handleMarker);
-    if (previewLayer) map.removeLayer(previewLayer);
-    tempPos = null; handleMarker = null;
-}
 
+// ==========================================
+// --- 8. TÍNH TOÁN HÌNH HỌC (VẼ GÓC CAMERA) ---
+// ==========================================
 function drawFOV(lat, lng, h, a, r, color) {
     const pts = [[lat, lng]]; const sH = h - a/2;
     for (let i = 0; i <= 20; i++) {
@@ -283,6 +344,7 @@ function drawFOV(lat, lng, h, a, r, color) {
     }
     return L.polygon(pts, { color, weight: 1, fillOpacity: 0.2 });
 }
+
 function calculateEndPoint(lat, lng, brng, dist) {
     const R = 6378137, b = brng * Math.PI / 180, l1 = lat * Math.PI / 180, ln1 = lng * Math.PI / 180, dR = dist / R;
     const l2 = Math.asin(Math.sin(l1) * Math.cos(dR) + Math.cos(l1) * Math.sin(dR) * Math.cos(b));
@@ -290,29 +352,40 @@ function calculateEndPoint(lat, lng, brng, dist) {
     return { lat: l2 * 180 / Math.PI, lng: ln2 * 180 / Math.PI };
 }
 
-// --- XUẤT / NHẬP DỮ LIỆU ---
+// ==========================================
+// --- 9. XUẤT, NHẬP & GỘP DỮ LIỆU ---
+// ==========================================
 function exportExcel() {
     let csv = "\ufeffLoại,Tên,SĐT,Địa chỉ,Ghi chú,Lat,Lng\n";
     data.hos.forEach(h => csv += `Hộ Dân,${escapeHTML(h.name)},${escapeHTML(h.phone)},"${escapeHTML(h.addr)}","${escapeHTML((h.note||'').replace(/\n/g, ' '))}",${h.lat},${h.lng}\n`);
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = "bao_thuan.csv"; a.click();
-}
-function exportJSON() {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })); a.download = "data_backup.json"; a.click();
+    const a = document.createElement('a'); 
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); 
+    a.download = "bao_thuan.csv"; a.click();
 }
 
+function exportJSON() {
+    const a = document.createElement('a'); 
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })); 
+    a.download = "data_backup.json"; a.click();
+}
+
+// Chức năng Phục hồi (Xóa cũ, đè mới)
 function importJSON(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
             const imported = JSON.parse(e.target.result);
-            if (imported.cams && imported.hos) { data = imported; saveData(); alert("Đã phục hồi (Ghi đè) dữ liệu thành công!"); }
+            if (imported.cams && imported.hos) { 
+                data = imported; saveData(); 
+                alert("Đã phục hồi (Ghi đè) dữ liệu thành công!"); 
+            }
         } catch(err) { alert("File không hợp lệ!"); }
     };
-    reader.readAsText(event.target.files[0]);
+    if(event.target.files[0]) reader.readAsText(event.target.files[0]);
     event.target.value = ''; // Reset input
 }
 
-// TÍNH NĂNG MỚI: GỘP DỮ LIỆU (MERGE)
+// Chức năng Gộp dữ liệu (Merge)
 function mergeJSON(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -322,7 +395,7 @@ function mergeJSON(event) {
             
             if (imported.cams) {
                 imported.cams.forEach(newCam => {
-                    // Kiểm tra trùng ID hoặc trùng chính xác vị trí
+                    // Kiểm tra xem ID hoặc Tọa độ đã tồn tại chưa
                     if (!data.cams.some(c => c.id === newCam.id || (c.lat === newCam.lat && c.lng === newCam.lng))) {
                         data.cams.push(newCam); countCam++;
                     }
@@ -339,28 +412,38 @@ function mergeJSON(event) {
             alert(`Đã gộp thành công!\n- Thêm mới: ${countCam} Camera.\n- Thêm mới: ${countHo} Hộ dân.`);
         } catch(err) { alert("Lỗi đọc file JSON!"); }
     };
-    reader.readAsText(event.target.files[0]);
+    if(event.target.files[0]) reader.readAsText(event.target.files[0]);
     event.target.value = ''; // Reset
 }
 
+// Khởi chạy vẽ bản đồ lần đầu
 renderAll();
 
-// --- LOGIC VUỐT BOTTOM SHEET ---
+// ==========================================
+// --- 10. LOGIC VUỐT BOTTOM SHEET (Dành cho Mobile) ---
+// ==========================================
 const sidePanel = document.getElementById('side-panel'), dragHandle = document.getElementById('drag-handle'), gpsBtn = document.querySelector('.gps-button');
 let startY = 0, currentHeight = 0, isDragging = false;
 
 dragHandle.addEventListener('touchstart', (e) => {
     if (window.innerWidth > 768) return;
-    startY = e.touches[0].clientY; currentHeight = sidePanel.getBoundingClientRect().height;
-    sidePanel.style.transition = 'none'; if(gpsBtn) gpsBtn.style.transition = 'none';
+    startY = e.touches[0].clientY; 
+    currentHeight = sidePanel.getBoundingClientRect().height;
+    
+    // Tắt transition khi đang kéo để mượt theo ngón tay
+    sidePanel.style.transition = 'none'; 
+    if(gpsBtn) gpsBtn.style.transition = 'none';
     isDragging = true;
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
     let newHeight = currentHeight - (e.touches[0].clientY - startY);
+    
+    // Giới hạn kéo từ 15% đến 85% màn hình
     if (newHeight < window.innerHeight * 0.15) newHeight = window.innerHeight * 0.15;
     if (newHeight > window.innerHeight * 0.85) newHeight = window.innerHeight * 0.85;
+    
     sidePanel.style.height = newHeight + 'px';
     if(gpsBtn) gpsBtn.style.bottom = (newHeight + 20) + 'px';
 }, { passive: true });
@@ -368,8 +451,18 @@ document.addEventListener('touchmove', (e) => {
 document.addEventListener('touchend', () => {
     if (!isDragging) return;
     isDragging = false;
-    sidePanel.style.transition = 'height 0.3s ease-out'; if(gpsBtn) gpsBtn.style.transition = 'bottom 0.3s ease-out';
+    
+    // Bật lại transition để chạy animation hút (snap)
+    sidePanel.style.transition = 'height 0.3s ease-out'; 
+    if(gpsBtn) gpsBtn.style.transition = 'bottom 0.3s ease-out';
+    
     const percent = sidePanel.getBoundingClientRect().height / window.innerHeight;
-    let snap = '45vh'; if (percent < 0.3) snap = '15vh'; else if (percent > 0.6) snap = '85vh';
-    sidePanel.style.height = snap; if(gpsBtn) gpsBtn.style.bottom = `calc(${snap} + 20px)`;
+    
+    // Các mốc hút: 15% (thấp), 45% (vừa), 85% (cao)
+    let snap = '45vh'; 
+    if (percent < 0.3) snap = '15vh'; 
+    else if (percent > 0.6) snap = '85vh';
+    
+    sidePanel.style.height = snap; 
+    if(gpsBtn) gpsBtn.style.bottom = `calc(${snap} + 20px)`;
 });
