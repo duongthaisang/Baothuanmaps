@@ -3,13 +3,13 @@
 // ==========================================
 const defaultPos = [11.610961926975536, 108.11585590451305];
 
-// [BẢO VỆ CHỐNG CRASH] Xử lý lỗi khi điện thoại chặn LocalStorage (Tab ẩn danh)
+// Xử lý lỗi an toàn nếu điện thoại chặn bộ nhớ
 let data = { cams: [], hos: [] };
 try {
     const storedData = localStorage.getItem('bt_data');
     if (storedData) data = JSON.parse(storedData);
 } catch (error) {
-    console.warn("Điện thoại chặn LocalStorage, sẽ dùng dữ liệu trống tạm thời.");
+    console.warn("Chặn LocalStorage, dùng dữ liệu trống tạm thời.");
 }
 if (!data.cams) data.cams = [];
 if (!data.hos) data.hos = [];
@@ -21,25 +21,26 @@ const map = L.map('map', { center: defaultPos, zoom: 18, minZoom: 3, maxZoom: 22
 L.control.zoom({ position: 'topright' }).addTo(map);
 map.attributionControl.addAttribution('<b style="color:#e67e22;">Dương Thái Sang</b>');
 
-// Layer Vệ Tinh Google (Khóa maxNativeZoom ở 19 để chống màn hình đen)
-L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { 
-    maxZoom: 22, maxNativeZoom: 19, subdomains:['mt0','mt1','mt2','mt3'] 
+// Layer Vệ Tinh Google (Dùng mt1.google.com và maxNativeZoom: 19 để tối ưu)
+L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { 
+    maxZoom: 22, maxNativeZoom: 19
 }).addTo(map);
-
-// Tạm thời TẮT Layer Offline để tránh làm treo điện thoại khi chưa có thư mục ảnh. 
-// Nếu bạn có file ảnh offline thật, hãy xóa dấu // ở 3 dòng dưới để bật lại.
-/*
-L.tileLayer('baothuan_tiles/{z}/{x}/{y}.jpg', {
-    maxZoom: 22, maxNativeZoom: 18, minZoom: 1, noWrap: true, opacity: 1.0
-}).addTo(map);
-*/
 
 const layers = L.layerGroup().addTo(map);
 
-function escapeHTML(str) { return str ? str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '&quot;' }[tag])) : ''; }
+// HÀM SỬA LỖI SYNTAX Ở ĐÂY ĐÃ ĐƯỢC VÁ HOÀN TOÀN:
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.toString().replace(/[&<>'"]/g, function(tag) {
+        const charsToReplace = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+        return charsToReplace[tag] || tag;
+    });
+}
 
-// Cập nhật link dẫn đường chuẩn API của Google Maps
-function getNavUrl(lat, lng) { return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`; }
+// Lấy link chỉ đường Google Maps chuẩn để mở app trên điện thoại
+function getNavUrl(lat, lng) { 
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`; 
+}
 
 function locateUser(zoomIn = false) {
     if (!navigator.geolocation) { alert("Trình duyệt không hỗ trợ GPS!"); return; }
@@ -48,7 +49,7 @@ function locateUser(zoomIn = false) {
         if (userMarker) userMarker.setLatLng([lat, lng]);
         else userMarker = L.marker([lat, lng], { icon: L.divIcon({ className: 'user-location-dot', iconSize: [14, 14] }) }).addTo(map);
         if (zoomIn) map.flyTo([lat, lng], 19);
-    }, (err) => { alert("Vui lòng cấp quyền vị trí cho trang web để dùng tính năng này."); }, { enableHighAccuracy: true });
+    }, (err) => { alert("Vui lòng cấp quyền vị trí cho trang web."); }, { enableHighAccuracy: true });
 }
 
 // ==========================================
@@ -59,8 +60,8 @@ map.on('click', (e) => {
     tempPos = e.latlng;
     L.popup().setLatLng(tempPos).setContent(`
         <div style="text-align:center;">
-            <button class="btn btn-save" style="background:#e67e22; width:130px; margin-bottom:5px;" onclick="startAdd('camera')">📸 THÊM CAMERA</button><br>
-            <button class="btn btn-save ho-bg" style="width:130px;" onclick="startAdd('household')">🏠 THÊM HỘ DÂN</button>
+            <button class="btn btn-save" style="background:#e67e22; width:140px; margin-bottom:5px;" onclick="startAdd('camera')">📸 THÊM CAMERA</button><br>
+            <button class="btn btn-save ho-bg" style="width:140px;" onclick="startAdd('household')">🏠 THÊM HỘ DÂN</button>
         </div>
     `).openOn(map);
 });
@@ -190,7 +191,7 @@ function renderAll() {
     });
     data.hos.forEach(h => {
         const m = L.circleMarker([h.lat, h.lng], { radius: 8, color: '#2ecc71', fillOpacity: 1 }).addTo(layers);
-        m.bindPopup(`<div class="popup-container"><b>🏠 ${escapeHTML(h.name)}</b><br>📞 ${escapeHTML(h.phone)}<div class="popup-note-box">${escapeHTML(h.note)}</div><a href="${getNavUrl(h.lat, h.lng)}" target="_blank" class="btn btn-nav">🗺️ CHỈ ĐƯỜNG</a><button class="btn btn-save btn-full ho-bg" onclick="startAdd('household', ${h.id})">SỬA</button></div>`);
+        m.bindPopup(`<div class="popup-container"><b>🏠 ${escapeHTML(h.name)}</b><br>📞 ${escapeHTML(h.phone)}<div class="popup-note-box">${escapeHTML(h.note)}</div><a href="${getNavUrl(h.lat, h.lng)}" target="_blank" class="btn btn-nav ho-bg">🗺️ CHỈ ĐƯỜNG</a><button class="btn btn-save btn-full ho-bg" onclick="startAdd('household', ${h.id})">SỬA</button></div>`);
         markerRefs.hos[h.id] = m;
     });
     refreshList();
@@ -219,7 +220,7 @@ function handleTopSearch() {
         res.slice(0, 10).forEach(item => {
             const div = document.createElement('div'); div.className = 'search-item';
             div.innerHTML = `<strong>${item.type==='cam'?'📸':'🏠'} ${escapeHTML(item.name)}</strong><br><small>${item.phone || item.addr || ''}</small>`;
-            div.onclick = () => { focusItem(item.type==='cam'?'camera':'household', item.id, item.lat, item.lng); dropdown.style.display='none'; };
+            div.onclick = () => { focusItem(item.type==='cam'?'camera':'household', item.id, item.lat, item.lng); dropdown.style.display='none'; document.getElementById('main-search').value = ''; };
             dropdown.appendChild(div);
         });
     }
@@ -229,7 +230,7 @@ function handleTopSearch() {
 function clearSearch() { document.getElementById('main-search').value = ''; document.getElementById('search-results-dropdown').style.display='none'; }
 
 function focusItem(type, id, lat, lng) {
-    map.flyTo([lat, lng], 19); // Mức zoom an toàn
+    map.flyTo([lat, lng], 19);
     if (window.innerWidth <= 768) {
         const sidePanel = document.getElementById('side-panel');
         if (sidePanel) sidePanel.style.height = '15vh';
@@ -252,11 +253,11 @@ function refreshList() {
 
 function createRow(type, item) {
     const div = document.createElement('div'); div.className = 'item-row';
-    div.innerHTML = `<div style="flex:1" onclick="focusItem('${type}', ${item.id}, ${item.lat}, ${item.lng})"><b>${escapeHTML(item.name)}</b><br><small>${item.phone || item.h+'°'}</small></div><button class="btn-action btn-edit" onclick="startAdd('${type}', ${item.id})">✎</button><button class="btn-action btn-del" onclick="deleteItem('${type}', ${item.id})">🗑</button>`;
+    div.innerHTML = `<div style="flex:1" onclick="focusItem('${type}', ${item.id}, ${item.lat}, ${item.lng})"><b>${escapeHTML(item.name)}</b><br><small>${item.phone || item.h+'°'}</small></div><a href="${getNavUrl(item.lat, item.lng)}" target="_blank" class="btn-action btn-go">📍</a><button class="btn-action btn-edit" onclick="startAdd('${type}', ${item.id})">✎</button><button class="btn-action btn-del" onclick="deleteItem('${type}', ${item.id})">🗑</button>`;
     return div;
 }
 
-function deleteItem(type, id) { if(confirm("Xóa mục này?")) { if(type==='camera') data.cams=data.cams.filter(c=>c.id!==id); else data.hos=data.hos.filter(h=>h.id!==id); saveData(); } }
+function deleteItem(type, id) { if(confirm("Xóa mục này khỏi bản đồ?")) { if(type==='camera') data.cams=data.cams.filter(c=>c.id!==id); else data.hos=data.hos.filter(h=>h.id!==id); saveData(); } }
 
 function saveData() { 
     try { localStorage.setItem('bt_data', JSON.stringify(data)); } 
