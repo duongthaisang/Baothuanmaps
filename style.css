@@ -191,4 +191,26 @@ textarea { resize: none; min-height: 80px; }
         bottom: calc(45vh + 20px) !important; 
         transition: bottom 0.3s ease-out; 
     }
+}/* --- TỐI ƯU CÁC NÚT BẤM TRONG POPUP BẢN ĐỒ --- */
+.popup-container .btn {
+    padding: 8px 10px !important; /* Giảm độ phình của nút cho gọn gàng */
+    font-size: 13px !important;   /* Thu nhỏ chữ một chút để cân đối */
+    margin-top: 8px !important;
+    box-sizing: border-box !important; /* Ép viền chuẩn xác, chống lệch */
+    display: block !important;    /* Ép thẻ <a> và <button> hiển thị giống hệt nhau */
+    width: 100% !important;       /* Đảm bảo độ rộng bằng nhau 100% */
+    text-align: center !important;
+    text-decoration: none !important; /* Xóa gạch chân nếu là link */
+    line-height: normal !important;
+}
+
+/* Đảm bảo màu sắc không bị Leaflet ghi đè */
+.popup-container .btn-nav {
+    background: #4285f4 !important; 
+    color: white !important;
+}
+
+.popup-container .ho-bg {
+    background: #27ae60 !important;
+    color: white !important;
 }
