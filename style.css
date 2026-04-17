@@ -3,13 +3,13 @@
 /* ========================================= */
 body, html { 
     margin: 0; padding: 0; 
-    height: 100%; height: 100dvh; /* Tối ưu chiều cao thực trên iOS/Android */
+    height: 100%; height: 100dvh; 
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
     background: #1a1a1a; overflow: hidden; 
 }
 
 *, *::before, *::after {
-    box-sizing: border-box; /* Khắc phục triệt để lỗi lệch layout cho mọi thành phần */
+    box-sizing: border-box; 
 }
 
 #map { height: 100%; width: 100%; background: #222; z-index: 1; }
@@ -26,7 +26,7 @@ body, html {
     overflow: hidden; backdrop-filter: blur(10px);
 }
 
-.drag-handle { display: none; } /* Ẩn thanh kéo trên máy tính */
+.drag-handle { display: none; } 
 
 /* --- TABS --- */
 .tabs { display: flex; background: #f1f3f5; border-bottom: 1px solid #ddd; flex-shrink: 0;}
@@ -145,7 +145,6 @@ textarea { resize: none; min-height: 80px; }
     border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px #007bff;
 }
 
-/* Tối ưu các nút bấm bên trong Popup của Leaflet cho đều nhau */
 .popup-container .btn {
     padding: 8px 10px !important; 
     font-size: 13px !important;   
@@ -161,46 +160,24 @@ textarea { resize: none; min-height: 80px; }
 .popup-container .ho-bg { background: #27ae60 !important; color: white !important; }
 
 /* ========================================= */
-/* --- MÀN HÌNH ĐĂNG NHẬP --- */
-/* ========================================= */
-#login-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(30, 30, 30, 0.95); z-index: 9999;
-    display: flex; justify-content: center; align-items: center;
-}
-.login-box { 
-    background: white; padding: 30px; border-radius: 16px; 
-    width: 90%; max-width: 320px; 
-    text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-#login-pwd { 
-    width: 100%; padding: 12px; border: 1px solid #ced4da; 
-    border-radius: 8px; margin: 15px 0; text-align: center; 
-    font-size: 16px; letter-spacing: 1px;
-}
-
-/* ========================================= */
 /* --- TỐI ƯU GIAO DIỆN CHO ĐIỆN THOẠI --- */
 /* ========================================= */
 @media (max-width: 768px) {
-    /* Thu gọn thanh tìm kiếm */
     #top-search-bar { 
         top: 15px; 
-        width: 80%; /* Giảm độ dài thanh tìm kiếm trên di động */
+        width: 80%; 
         max-width: 320px; 
     }
     .search-wrapper { padding: 4px 15px; }
     .search-icon { font-size: 16px; }
     #main-search { font-size: 15px; padding: 8px 0; }
     
-    /* Bảng điều khiển (Bottom Sheet) vuốt lên/xuống */
     #side-panel {
         width: 100vw !important; left: 0 !important; top: auto !important; bottom: 0 !important; 
         border-radius: 20px 20px 0 0 !important; height: 45vh; max-height: 90vh !important; 
         box-shadow: 0 -5px 20px rgba(0,0,0,0.15) !important; transition: height 0.3s ease-out;
     }
     
-    /* Thanh hiển thị chổ vuốt tay */
     .drag-handle {
         display: flex; justify-content: center; align-items: center;
         height: 25px; width: 100%; cursor: grab; background: white;
@@ -208,7 +185,6 @@ textarea { resize: none; min-height: 80px; }
     }
     .drag-handle::after { content: ''; width: 40px; height: 5px; background: #cbd5e1; border-radius: 5px; }
     
-    /* Đồng bộ vị trí nút định vị theo bảng điều khiển */
     .gps-button { 
         bottom: calc(45vh + 20px) !important; 
         transition: bottom 0.3s ease-out; 
