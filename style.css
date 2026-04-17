@@ -1,4 +1,6 @@
-/* --- CẤU HÌNH CHUNG --- */
+/* ========================================= */
+/* --- CẤU HÌNH CHUNG & RESET LAYOUT --- */
+/* ========================================= */
 body, html { 
     margin: 0; padding: 0; 
     height: 100%; height: 100dvh; /* Tối ưu chiều cao thực trên iOS/Android */
@@ -12,7 +14,9 @@ body, html {
 
 #map { height: 100%; width: 100%; background: #222; z-index: 1; }
 
-/* --- SIDE PANEL (BẢNG ĐIỀU KHIỂN) --- */
+/* ========================================= */
+/* --- BẢNG ĐIỀU KHIỂN (SIDE PANEL) --- */
+/* ========================================= */
 #side-panel {
     position: absolute; top: 80px; left: 15px; z-index: 1000;
     background: rgba(255, 255, 255, 0.95); 
@@ -43,7 +47,9 @@ body, html {
 }
 textarea { resize: none; min-height: 80px; }
 
-/* --- NÚT BẤM CHUNG --- */
+/* ========================================= */
+/* --- NÚT BẤM (BUTTONS) --- */
+/* ========================================= */
 .btn { 
     padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
     font-weight: bold; font-size: 14px; transition: 0.2s; 
@@ -54,13 +60,15 @@ textarea { resize: none; min-height: 80px; }
 .btn-nav { background: #4285f4; color: white; text-align: center; text-decoration: none; display: block; }
 .ho-bg { background: #27ae60 !important; }
 
-/* Nút chức năng nâng cao */
+/* Nút chức năng nâng cao dưới cùng */
 .excel-bg { background: #107c41; color: white; }
 .backup-bg { background: #6c757d; color: white; }
 .merge-bg { background: #007bff; color: white; }
 .restore-bg { background: #dc3545; color: white; }
 
-/* --- TÌM KIẾM GOOGLE MAPS --- */
+/* ========================================= */
+/* --- TÌM KIẾM THEO CHUẨN GOOGLE MAPS --- */
+/* ========================================= */
 #top-search-bar {
     position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
     width: 90%; max-width: 400px; z-index: 1001;
@@ -87,7 +95,9 @@ textarea { resize: none; min-height: 80px; }
 .search-item:last-child { border-bottom: none; }
 .search-item:hover { background: #f8f9fa; }
 
-/* --- DANH SÁCH --- */
+/* ========================================= */
+/* --- DANH SÁCH & THỐNG KÊ --- */
+/* ========================================= */
 .list-header { 
     background: #f8f9fa; padding: 8px 12px; font-size: 11px; 
     font-weight: bold; color: #868e96; border-radius: 6px; 
@@ -105,9 +115,8 @@ textarea { resize: none; min-height: 80px; }
 }
 .btn-edit { background: #e7f5ff; color: #228be6; }
 .btn-del { background: #fff5f5; color: #fa5252; }
-.btn-go { background: #e8f0fe; color: #1a73e8; font-size: 14px; } 
+.btn-go { background: #e8f0fe; color: #1a73e8; font-size: 14px; text-decoration: none; } 
 
-/* --- THỐNG KÊ (STAT BAR) --- */
 .stat-bar { 
     background: #fff5eb; padding: 12px; border-radius: 12px; 
     margin-bottom: 10px; display: flex; justify-content: space-around; 
@@ -117,7 +126,9 @@ textarea { resize: none; min-height: 80px; }
 .stat-val { display: block; font-weight: bold; color: #e67e22; font-size: 20px; }
 .stat-label { font-size: 11px; color: #fd7e14; font-weight: bold; }
 
-/* --- POPUP & GPS --- */
+/* ========================================= */
+/* --- POPUP BẢN ĐỒ & GPS --- */
+/* ========================================= */
 .popup-container { min-width: 200px; padding: 5px; }
 .popup-note-box { 
     white-space: pre-wrap; background: #f8f9fa; padding: 10px; 
@@ -134,7 +145,24 @@ textarea { resize: none; min-height: 80px; }
     border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px #007bff;
 }
 
-/* --- OVERLAY ĐĂNG NHẬP --- */
+/* Tối ưu các nút bấm bên trong Popup của Leaflet cho đều nhau */
+.popup-container .btn {
+    padding: 8px 10px !important; 
+    font-size: 13px !important;   
+    margin-top: 8px !important;
+    box-sizing: border-box !important; 
+    display: block !important;    
+    width: 100% !important;       
+    text-align: center !important;
+    text-decoration: none !important; 
+    line-height: normal !important;
+}
+.popup-container .btn-nav { background: #4285f4 !important; color: white !important; }
+.popup-container .ho-bg { background: #27ae60 !important; color: white !important; }
+
+/* ========================================= */
+/* --- MÀN HÌNH ĐĂNG NHẬP --- */
+/* ========================================= */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(30, 30, 30, 0.95); z-index: 9999;
@@ -142,7 +170,7 @@ textarea { resize: none; min-height: 80px; }
 }
 .login-box { 
     background: white; padding: 30px; border-radius: 16px; 
-    width: 90%; max-width: 320px; /* Tối ưu cho màn hình nhỏ */
+    width: 90%; max-width: 320px; 
     text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 #login-pwd { 
@@ -157,28 +185,22 @@ textarea { resize: none; min-height: 80px; }
 @media (max-width: 768px) {
     /* Thu gọn thanh tìm kiếm */
     #top-search-bar { 
-        top: 12px; 
-        width: 95%; 
+        top: 15px; 
+        width: 80%; /* Giảm độ dài thanh tìm kiếm trên di động */
+        max-width: 320px; 
     }
-    .search-wrapper { 
-        padding: 2px 12px; /* Giảm độ phình của viền */
-    }
-    .search-icon { 
-        font-size: 15px; 
-    }
-    #main-search { 
-        font-size: 14px; /* Chữ nhỏ hơn một chút cho gọn */
-        padding: 8px 0; 
-    }
+    .search-wrapper { padding: 4px 15px; }
+    .search-icon { font-size: 16px; }
+    #main-search { font-size: 15px; padding: 8px 0; }
     
-    /* Bảng điều khiển (Bottom Sheet) */
+    /* Bảng điều khiển (Bottom Sheet) vuốt lên/xuống */
     #side-panel {
         width: 100vw !important; left: 0 !important; top: auto !important; bottom: 0 !important; 
         border-radius: 20px 20px 0 0 !important; height: 45vh; max-height: 90vh !important; 
         box-shadow: 0 -5px 20px rgba(0,0,0,0.15) !important; transition: height 0.3s ease-out;
     }
     
-    /* Thanh kéo */
+    /* Thanh hiển thị chổ vuốt tay */
     .drag-handle {
         display: flex; justify-content: center; align-items: center;
         height: 25px; width: 100%; cursor: grab; background: white;
@@ -186,31 +208,9 @@ textarea { resize: none; min-height: 80px; }
     }
     .drag-handle::after { content: ''; width: 40px; height: 5px; background: #cbd5e1; border-radius: 5px; }
     
-    /* Vị trí nút định vị GPS */
+    /* Đồng bộ vị trí nút định vị theo bảng điều khiển */
     .gps-button { 
         bottom: calc(45vh + 20px) !important; 
         transition: bottom 0.3s ease-out; 
     }
-}/* --- TỐI ƯU CÁC NÚT BẤM TRONG POPUP BẢN ĐỒ --- */
-.popup-container .btn {
-    padding: 8px 10px !important; /* Giảm độ phình của nút cho gọn gàng */
-    font-size: 13px !important;   /* Thu nhỏ chữ một chút để cân đối */
-    margin-top: 8px !important;
-    box-sizing: border-box !important; /* Ép viền chuẩn xác, chống lệch */
-    display: block !important;    /* Ép thẻ <a> và <button> hiển thị giống hệt nhau */
-    width: 100% !important;       /* Đảm bảo độ rộng bằng nhau 100% */
-    text-align: center !important;
-    text-decoration: none !important; /* Xóa gạch chân nếu là link */
-    line-height: normal !important;
-}
-
-/* Đảm bảo màu sắc không bị Leaflet ghi đè */
-.popup-container .btn-nav {
-    background: #4285f4 !important; 
-    color: white !important;
-}
-
-.popup-container .ho-bg {
-    background: #27ae60 !important;
-    color: white !important;
 }
