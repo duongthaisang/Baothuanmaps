@@ -1,22 +1,21 @@
 // ==========================================
 // --- 1. BẢO MẬT & ĐĂNG NHẬP CƠ BẢN ---
 // ==========================================
-const Mật_Khẩu_Của_Bạn = "767679"; 
+//const Mật_Khẩu_Của_Bạn = "767679"; 
 
-function checkLogin() {
-    if (document.getElementById('login-pwd').value === Mật_Khẩu_Của_Bạn) {
-        document.getElementById('login-overlay').style.display = 'none';
-    } else {
-        document.getElementById('login-err').style.display = 'block';
-    }
-}
-function handleLoginEnter(e) { if (e.key === 'Enter') checkLogin(); }
+//function checkLogin() {
+//    if (document.getElementById('login-pwd').value === Mật_Khẩu_Của_Bạn) {
+//        document.getElementById('login-overlay').style.display = 'none';
+//    } else {
+ //       document.getElementById('login-err').style.display = 'block';
+//}
+//function handleLoginEnter(e) { if (e.key === 'Enter') checkLogin(); }
 
 // Chống XSS (Bảo mật khi render text)
-function escapeHTML(str) {
-    if (!str) return '';
-    return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '&quot;' }[tag]));
-}
+//function escapeHTML(str) {
+//    if (!str) return '';
+//    return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '&quot;' }[tag]));
+//}
 
 // ==========================================
 // --- 2. CẤU HÌNH BẢN ĐỒ & BIẾN TOÀN CỤC ---
