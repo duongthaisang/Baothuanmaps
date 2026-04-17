@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bảo Thuận Maps - Quản Lý Camera & Hộ Dân</title>
     <link rel="shortcut icon" href="icon/logo.ico" type="image/x-icon">
-    <link rel="stylesheet" href="dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -73,11 +75,11 @@
                 <div class="stat-item"><span id="stat-ho" class="stat-val">0</span><span class="stat-label">Hộ Dân</span></div>
             </div>
             <div id="list-body"></div>
-            <div class="export-section">
+            <div class="export-section" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
                 <button class="btn btn-export btn-full excel-bg" onclick="exportExcel()">📊 XUẤT FILE EXCEL</button>
                 <button class="btn btn-export btn-full backup-bg" onclick="exportJSON()">💾 SAO LƯU DỮ LIỆU</button>
                 <button class="btn btn-export btn-full merge-bg" onclick="document.getElementById('file-merge').click()">🔄 CẬP NHẬT THÊM</button>
-                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI DỮ LIỆU</button>
+                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI (GHI ĐÈ)</button>
                 <input type="file" id="file-merge" style="display:none" accept=".json" onchange="mergeJSON(event)">
                 <input type="file" id="file-restore" style="display:none" accept=".json" onchange="importJSON(event)">
             </div>
@@ -85,9 +87,10 @@
     </div>
 
     <div class="gps-button" onclick="locateUser(true)">🎯</div>
+    
     <div id="map"></div>
 
-    <script src="dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
