@@ -18,10 +18,19 @@
         <div class="login-box">
             <h2 style="color: #e67e22; margin-top: 0;">BẢO THUẬN MAPS</h2>
             <p style="font-size: 14px; color: #666;">Khu vực nội bộ. Vui lòng nhập mã truy cập.</p>
-            <input type="password" id="login-pwd" placeholder="Mật khẩu (Liên hệ Sang)" onkeypress="handleLoginEnter(event)" autofocus>
+            <input type="password" id="login-pwd" placeholder="Mật khẩu" onkeypress="handleLoginEnter(event)" autofocus>
             <button class="btn btn-save btn-full" onclick="checkLogin()">ĐĂNG NHẬP</button>
             <p id="login-err" style="color: red; font-size: 13px; display: none; margin-top: 10px;">Mã không chính xác!</p>
         </div>
+    </div>
+
+    <div id="top-search-bar">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="main-search" placeholder="Tìm kiếm hộ dân, camera..." oninput="handleTopSearch()">
+            <span class="clear-search" onclick="clearSearch()">✖</span>
+        </div>
+        <div id="search-results-dropdown" style="display:none;"></div>
     </div>
 
     <div id="side-panel">
@@ -64,7 +73,7 @@
                     <div class="form-group"><label>Số điện thoại:</label><input type="text" id="in-ho-phone"></div>
                     <div class="form-group"><label>Địa chỉ:</label><input type="text" id="in-ho-addr"></div>
                     <div class="form-group"><label>Ghi chú (có thể xuống dòng):</label>
-                        <textarea id="in-ho-note" rows="5"></textarea>
+                        <textarea id="in-ho-note" rows="4"></textarea>
                     </div>
                     <button class="btn btn-save btn-full ho-bg" onclick="finalSave('household')">LƯU HỘ DÂN</button>
                 </div>
@@ -78,13 +87,14 @@
                 <div class="stat-item"><span id="stat-cam" class="stat-val">0</span><span class="stat-label">Camera</span></div>
                 <div class="stat-item"><span id="stat-ho" class="stat-val">0</span><span class="stat-label">Hộ Dân</span></div>
             </div>
-            <input type="text" id="search-q" class="search-input" placeholder="Tìm tên, SĐT, địa chỉ, ghi chú..." oninput="refreshList()">
             <div id="list-body"></div>
-            <div class="export-section">
+            <div class="export-section" style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
                 <button class="btn btn-export btn-full excel-bg" onclick="exportExcel()">📊 XUẤT FILE EXCEL</button>
-                <button class="btn btn-export btn-full word-bg" onclick="exportWord()">📄 XUẤT BÁO CÁO WORD</button>
-                <button class="btn btn-export btn-full backup-bg" onclick="exportJSON()">💾 SAO LƯU (JSON)</button>
-                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI DỮ LIỆU</button>
+                <button class="btn btn-export btn-full backup-bg" onclick="exportJSON()">💾 SAO LƯU DỮ LIỆU</button>
+                <button class="btn btn-export btn-full merge-bg" onclick="document.getElementById('file-merge').click()">🔄 CẬP NHẬT THÊM (GỘP)</button>
+                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI (GHI ĐÈ)</button>
+                
+                <input type="file" id="file-merge" style="display:none" accept=".json" onchange="mergeJSON(event)">
                 <input type="file" id="file-restore" style="display:none" accept=".json" onchange="importJSON(event)">
             </div>
         </div>
