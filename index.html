@@ -5,29 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bảo Thuận Maps - Quản Lý Camera & Hộ Dân</title>
     <link rel="shortcut icon" href="icon/logo.ico" type="image/x-icon">
-    
     <link rel="stylesheet" href="dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <h2 style="color: #e67e22; margin-top: 0;">BẢO THUẬN MAPS</h2>
-            <p style="font-size: 14px; color: #666;">Khu vực nội bộ. Vui lòng nhập mã truy cập.</p>
-            <input type="password" id="login-pwd" placeholder="Mật khẩu" onkeypress="handleLoginEnter(event)" autofocus>
-            <button class="btn btn-save btn-full" onclick="checkLogin()">ĐĂNG NHẬP</button>
-            <p id="login-err" style="color: red; font-size: 13px; display: none; margin-top: 10px;">Mã không chính xác!</p>
-        </div>
-    </div>
-
     <div id="top-search-bar">
         <div class="search-wrapper">
             <span class="search-icon">🔍</span>
-            <input type="text" id="main-search" placeholder="Tìm kiếm hộ dân, camera..." oninput="handleTopSearch()">
+            <input type="text" id="main-search" placeholder="Tìm tên, SĐT, địa chỉ, ghi chú..." oninput="handleTopSearch()">
             <span class="clear-search" onclick="clearSearch()">✖</span>
         </div>
         <div id="search-results-dropdown" style="display:none;"></div>
@@ -35,7 +23,6 @@
 
     <div id="side-panel">
         <div id="drag-handle" class="drag-handle"></div>
-
         <div class="tabs">
             <div class="tab active" id="tab-btn-add" onclick="showTab('add')">THÊM / SỬA</div>
             <div class="tab" id="tab-btn-manage" onclick="showTab('manage')">DANH SÁCH</div>
@@ -48,12 +35,11 @@
             
             <div id="form-container" style="display:none;">
                 <input type="hidden" id="edit-id">
-                
                 <div id="form-cam" style="display:none;">
                     <h3 class="form-title cam-color">Cấu hình Camera</h3>
                     <div class="form-group"><label>Tên camera:</label><input type="text" id="in-cam-name"></div>
                     <div class="form-group">
-                        <label>Hướng xoay: <span id="val-h" class="val-highlight">90</span>°</label>
+                        <label>Hướng xoay: <span id="val-h" class="val-highlight">90</span>° (Kéo điểm trên bản đồ để xoay)</label>
                         <input type="range" id="in-cam-h" min="0" max="360" value="90" oninput="liveUpdate()">
                     </div>
                     <div class="form-group">
@@ -72,12 +58,11 @@
                     <div class="form-group"><label>Tên chủ hộ:</label><input type="text" id="in-ho-name"></div>
                     <div class="form-group"><label>Số điện thoại:</label><input type="text" id="in-ho-phone"></div>
                     <div class="form-group"><label>Địa chỉ:</label><input type="text" id="in-ho-addr"></div>
-                    <div class="form-group"><label>Ghi chú (có thể xuống dòng):</label>
+                    <div class="form-group"><label>Ghi chú:</label>
                         <textarea id="in-ho-note" rows="4"></textarea>
                     </div>
                     <button class="btn btn-save btn-full ho-bg" onclick="finalSave('household')">LƯU HỘ DÂN</button>
                 </div>
-                
                 <button class="btn btn-cancel btn-full" onclick="cancelAdd()">HỦY BỎ</button>
             </div>
         </div>
@@ -88,12 +73,11 @@
                 <div class="stat-item"><span id="stat-ho" class="stat-val">0</span><span class="stat-label">Hộ Dân</span></div>
             </div>
             <div id="list-body"></div>
-            <div class="export-section" style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
+            <div class="export-section">
                 <button class="btn btn-export btn-full excel-bg" onclick="exportExcel()">📊 XUẤT FILE EXCEL</button>
                 <button class="btn btn-export btn-full backup-bg" onclick="exportJSON()">💾 SAO LƯU DỮ LIỆU</button>
-                <button class="btn btn-export btn-full merge-bg" onclick="document.getElementById('file-merge').click()">🔄 CẬP NHẬT THÊM (GỘP)</button>
-                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI (GHI ĐÈ)</button>
-                
+                <button class="btn btn-export btn-full merge-bg" onclick="document.getElementById('file-merge').click()">🔄 CẬP NHẬT THÊM</button>
+                <button class="btn btn-export btn-full restore-bg" onclick="document.getElementById('file-restore').click()">📥 PHỤC HỒI DỮ LIỆU</button>
                 <input type="file" id="file-merge" style="display:none" accept=".json" onchange="mergeJSON(event)">
                 <input type="file" id="file-restore" style="display:none" accept=".json" onchange="importJSON(event)">
             </div>
