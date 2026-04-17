@@ -1,13 +1,18 @@
 /* --- CẤU HÌNH CHUNG --- */
 body, html { 
-    margin: 0; padding: 0; height: 100%; height: 100dvh; /* Tối ưu iOS */
+    margin: 0; padding: 0; 
+    height: 100%; height: 100dvh; /* Tối ưu chiều cao thực trên iOS/Android */
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
     background: #1a1a1a; overflow: hidden; 
 }
 
+*, *::before, *::after {
+    box-sizing: border-box; /* Khắc phục triệt để lỗi lệch layout cho mọi thành phần */
+}
+
 #map { height: 100%; width: 100%; background: #222; z-index: 1; }
 
-/* --- SIDE PANEL --- */
+/* --- SIDE PANEL (BẢNG ĐIỀU KHIỂN) --- */
 #side-panel {
     position: absolute; top: 80px; left: 15px; z-index: 1000;
     background: rgba(255, 255, 255, 0.95); 
@@ -17,8 +22,9 @@ body, html {
     overflow: hidden; backdrop-filter: blur(10px);
 }
 
-.drag-handle { display: none; }
+.drag-handle { display: none; } /* Ẩn thanh kéo trên máy tính */
 
+/* --- TABS --- */
 .tabs { display: flex; background: #f1f3f5; border-bottom: 1px solid #ddd; flex-shrink: 0;}
 .tab { 
     flex: 1; padding: 14px 10px; text-align: center; cursor: pointer; 
@@ -33,10 +39,11 @@ body, html {
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #495057; }
 .form-group input, .form-group textarea { 
     width: 100%; padding: 10px; border: 1px solid #ced4da; 
-    border-radius: 8px; box-sizing: border-box; font-size: 15px; 
+    border-radius: 8px; font-size: 15px; 
 }
 textarea { resize: none; min-height: 80px; }
 
+/* --- NÚT BẤM CHUNG --- */
 .btn { 
     padding: 12px; border: none; border-radius: 8px; cursor: pointer; 
     font-weight: bold; font-size: 14px; transition: 0.2s; 
@@ -47,7 +54,7 @@ textarea { resize: none; min-height: 80px; }
 .btn-nav { background: #4285f4; color: white; text-align: center; text-decoration: none; display: block; }
 .ho-bg { background: #27ae60 !important; }
 
-/* Các nút chức năng */
+/* Nút chức năng nâng cao */
 .excel-bg { background: #107c41; color: white; }
 .backup-bg { background: #6c757d; color: white; }
 .merge-bg { background: #007bff; color: white; }
@@ -57,6 +64,7 @@ textarea { resize: none; min-height: 80px; }
 #top-search-bar {
     position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
     width: 90%; max-width: 400px; z-index: 1001;
+    transition: all 0.3s ease;
 }
 .search-wrapper {
     display: flex; align-items: center; background: white;
@@ -64,10 +72,10 @@ textarea { resize: none; min-height: 80px; }
     padding: 5px 15px;
 }
 .search-icon { font-size: 18px; margin-right: 10px; color: #666; }
-.clear-search { font-size: 18px; cursor: pointer; color: #999; display: none; }
+.clear-search { font-size: 18px; cursor: pointer; color: #999; display: none; padding: 0 5px; }
 #main-search {
     flex-grow: 1; border: none; outline: none; padding: 10px 0;
-    font-size: 16px; background: transparent;
+    font-size: 16px; background: transparent; width: 100%;
 }
 #search-results-dropdown {
     background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -90,16 +98,16 @@ textarea { resize: none; min-height: 80px; }
     display: flex; align-items: center; gap: 8px;
     background: white; border-radius: 8px; margin-bottom: 5px;
 }
-.item-info { flex-grow: 1; cursor: pointer; }
+.item-info { flex-grow: 1; cursor: pointer; overflow: hidden; }
 .btn-action { 
     border: none; width: 32px; height: 32px; border-radius: 6px; 
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .btn-edit { background: #e7f5ff; color: #228be6; }
 .btn-del { background: #fff5f5; color: #fa5252; }
-.btn-go { background: #e8f0fe; color: #1a73e8; } /* Nút điều hướng nhỏ gọn */
+.btn-go { background: #e8f0fe; color: #1a73e8; font-size: 14px; } 
 
-/* --- STAT BAR --- */
+/* --- THỐNG KÊ (STAT BAR) --- */
 .stat-bar { 
     background: #fff5eb; padding: 12px; border-radius: 12px; 
     margin-bottom: 10px; display: flex; justify-content: space-around; 
@@ -132,17 +140,45 @@ textarea { resize: none; min-height: 80px; }
     background: rgba(30, 30, 30, 0.95); z-index: 9999;
     display: flex; justify-content: center; align-items: center;
 }
-.login-box { background: white; padding: 30px; border-radius: 16px; width: 300px; text-align: center; }
-#login-pwd { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; margin: 15px 0; text-align: center; }
+.login-box { 
+    background: white; padding: 30px; border-radius: 16px; 
+    width: 90%; max-width: 320px; /* Tối ưu cho màn hình nhỏ */
+    text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#login-pwd { 
+    width: 100%; padding: 12px; border: 1px solid #ced4da; 
+    border-radius: 8px; margin: 15px 0; text-align: center; 
+    font-size: 16px; letter-spacing: 1px;
+}
 
-/* --- TỐI ƯU MOBILE --- */
+/* ========================================= */
+/* --- TỐI ƯU GIAO DIỆN CHO ĐIỆN THOẠI --- */
+/* ========================================= */
 @media (max-width: 768px) {
+    /* Thu gọn thanh tìm kiếm */
+    #top-search-bar { 
+        top: 12px; 
+        width: 95%; 
+    }
+    .search-wrapper { 
+        padding: 2px 12px; /* Giảm độ phình của viền */
+    }
+    .search-icon { 
+        font-size: 15px; 
+    }
+    #main-search { 
+        font-size: 14px; /* Chữ nhỏ hơn một chút cho gọn */
+        padding: 8px 0; 
+    }
+    
+    /* Bảng điều khiển (Bottom Sheet) */
     #side-panel {
         width: 100vw !important; left: 0 !important; top: auto !important; bottom: 0 !important; 
         border-radius: 20px 20px 0 0 !important; height: 45vh; max-height: 90vh !important; 
         box-shadow: 0 -5px 20px rgba(0,0,0,0.15) !important; transition: height 0.3s ease-out;
     }
     
+    /* Thanh kéo */
     .drag-handle {
         display: flex; justify-content: center; align-items: center;
         height: 25px; width: 100%; cursor: grab; background: white;
@@ -150,5 +186,9 @@ textarea { resize: none; min-height: 80px; }
     }
     .drag-handle::after { content: ''; width: 40px; height: 5px; background: #cbd5e1; border-radius: 5px; }
     
-    .gps-button { bottom: calc(45vh + 20px) !important; transition: bottom 0.3s ease-out; }
+    /* Vị trí nút định vị GPS */
+    .gps-button { 
+        bottom: calc(45vh + 20px) !important; 
+        transition: bottom 0.3s ease-out; 
+    }
 }
