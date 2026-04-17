@@ -15,7 +15,7 @@ function handleLoginEnter(e) { if (e.key === 'Enter') checkLogin(); }
 // Chống XSS (Bảo mật khi render text)
 function escapeHTML(str) {
     if (!str) return '';
-    return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+    return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&', '<': '<', '>': '>', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 
 // ==========================================
@@ -25,34 +25,29 @@ const defaultPos = [11.610961926975536, 108.11585590451305];
 let data = JSON.parse(localStorage.getItem('bt_data')) || { cams: [], hos: [] };
 let tempPos = null, previewLayer = null, handleMarker = null, userMarker = null;
 
-// Lưu trữ object Marker để Popup có thể mở từ xa bằng code
 const markerRefs = { cams: {}, hos: {} };
 
 const map = L.map('map', { center: defaultPos, zoom: 18, minZoom: 3, maxZoom: 22, zoomControl: false });
-L.control.zoom({ position: 'topright' }).addTo(map); // Dời nút zoom qua phải nhường chỗ cho thanh Search
+L.control.zoom({ position: 'topright' }).addTo(map); 
 
 map.attributionControl.addAttribution('<b style="color:#e67e22;">Made by Dương Thái Sang</b>');
 
-// Layer bản đồ vệ tinh Google
 const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 22, subdomains:['mt0','mt1','mt2','mt3']
 }).addTo(map);
 
-// Layer nhóm để dễ dàng xóa/vẽ lại marker
 const layers = L.layerGroup().addTo(map);
 
 // ==========================================
 // --- 3. CÁC HÀM TIỆN ÍCH (GPS, CHỈ ĐƯỜNG) ---
 // ==========================================
 function getNavUrl(lat, lng) {
-    // Chuyển hướng sang app/web Google Maps
-    return `http://maps.google.com/maps?daddr=${lat},${lng}&amp;ll=`;
+    return `http://maps.google.com/maps?daddr=${lat},${lng}&ll=`;
 }
 
 function locateUser(zoomIn = false) {
     if (!navigator.geolocation) {
-        alert("Trình duyệt của bạn không hỗ trợ định vị GPS!");
-        return;
+        alert("Trình duyệt của bạn không hỗ trợ định vị GPS!"); return;
     }
     navigator.geolocation.getCurrentPosition((pos) => {
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
@@ -60,10 +55,9 @@ function locateUser(zoomIn = false) {
         else userMarker = L.marker([lat, lng], { 
             icon: L.divIcon({ className: 'user-location-dot', iconSize: [14, 14] }) 
         }).addTo(map);
-        
         if (zoomIn) map.flyTo([lat, lng], 19);
     }, (err) => {
-        alert("Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí trên máy bạn.");
+        alert("Không thể lấy vị trí. Hãy kiểm tra quyền truy cập vị trí.");
     }, { enableHighAccuracy: true });
 }
 
@@ -71,7 +65,7 @@ function locateUser(zoomIn = false) {
 // --- 4. TƯƠNG TÁC BẢN ĐỒ & FORM NHẬP LIỆU ---
 // ==========================================
 map.on('click', (e) => {
-    if (handleMarker) return; // Đang chỉnh góc cam thì không cho mở popup
+    if (handleMarker) return; 
     tempPos = e.latlng;
     L.popup().setLatLng(tempPos).setContent(`
         <div style="text-align:center; padding: 5px;">
@@ -89,17 +83,27 @@ function startAdd(type, editId = null) {
     document.getElementById('form-cam').style.display = (type === 'camera' ? 'block' : 'none');
     document.getElementById('form-ho').style.display = (type === 'household' ? 'block' : 'none');
     
-    // TỐI ƯU MOBILE: Chống che khuất bản đồ khi bật Form
+    // --- TỐI ƯU UX CHO MOBILE TẠI ĐÂY ---
     if (window.innerWidth <= 768 && tempPos) {
         const sidePanel = document.getElementById('side-panel');
-        sidePanel.style.height = '45vh'; // Cố định bảng điều khiển
-        if(document.querySelector('.gps-button')) document.querySelector('.gps-button').style.bottom = 'calc(45vh + 20px)';
-        
-        // Dịch bản đồ xuống một chút để điểm đang thêm nằm ở nửa trên
-        setTimeout(() => {
+        const gpsBtn = document.querySelector('.gps-button');
+
+        if (type === 'household') {
+            // Hộ dân: Đẩy bảng lên 85% để gõ phím không bị che
+            sidePanel.style.height = '85vh';
+            if(gpsBtn) gpsBtn.style.bottom = 'calc(85vh + 20px)';
             map.flyTo([tempPos.lat, tempPos.lng], 19, { animate: true });
-            setTimeout(() => { map.panBy([0, 150]); }, 300);
-        }, 100);
+        } else if (type === 'camera') {
+            // Camera: Giữ ở 45%, chừa nửa trên bản đồ để kéo thả marker điều chỉnh bằng tay
+            sidePanel.style.height = '45vh';
+            if(gpsBtn) gpsBtn.style.bottom = 'calc(45vh + 20px)';
+            
+            // Dịch bản đồ xuống để điểm camera nằm ở nửa trên màn hình
+            setTimeout(() => {
+                map.flyTo([tempPos.lat, tempPos.lng], 19, { animate: true });
+                setTimeout(() => { map.panBy([0, 150]); }, 300);
+            }, 100);
+        }
     }
 
     if (editId) {
@@ -117,7 +121,6 @@ function startAdd(type, editId = null) {
             document.getElementById('in-ho-note').value = item.note || "";
         }
     } else {
-        // Reset form
         document.getElementById('in-cam-name').value = ""; document.getElementById('in-cam-h').value = 90;
         document.getElementById('in-cam-a').value = 90; document.getElementById('in-cam-r').value = 60;
         document.getElementById('in-ho-name').value = ""; document.getElementById('in-ho-phone').value = "";
@@ -128,16 +131,16 @@ function startAdd(type, editId = null) {
     map.closePopup();
 }
 
-// Xử lý kéo thả Marker để chỉnh tầm xa Camera
 function initHandle() {
     if (handleMarker) map.removeLayer(handleMarker);
     const r = parseInt(document.getElementById('in-cam-r').value), h = parseInt(document.getElementById('in-cam-h').value);
     const p = calculateEndPoint(tempPos.lat, tempPos.lng, h, r);
     handleMarker = L.marker([p.lat, p.lng], { 
         draggable: true, 
-        icon: L.divIcon({ html: '<div style="width:16px;height:16px;background:white;border:3px solid #e67e22;border-radius:50%"></div>', iconSize: [16,16] }) 
+        icon: L.divIcon({ html: '<div style="width:18px;height:18px;background:white;border:4px solid #e67e22;border-radius:50%;box-shadow:0 0 5px rgba(0,0,0,0.5)"></div>', iconSize: [18,18] }) 
     }).addTo(map);
     
+    // Kéo thả trực tiếp trên bản đồ
     handleMarker.on('drag', (e) => {
         document.getElementById('in-cam-r').value = Math.round(map.distance(tempPos, e.target.getLatLng()));
         liveUpdate(false);
@@ -179,6 +182,14 @@ function cancelAdd() {
     if (handleMarker) map.removeLayer(handleMarker);
     if (previewLayer) map.removeLayer(previewLayer);
     tempPos = null; handleMarker = null;
+
+    // --- TỰ ĐỘNG HẠ BẢNG ĐIỀU KHIỂN KHI LƯU HOẶC HỦY ---
+    if (window.innerWidth <= 768) {
+        const sidePanel = document.getElementById('side-panel');
+        const gpsBtn = document.querySelector('.gps-button');
+        sidePanel.style.height = '15vh'; // Thụt xuống mức thấp nhất
+        if (gpsBtn) gpsBtn.style.bottom = 'calc(15vh + 20px)';
+    }
 }
 
 // ==========================================
@@ -237,7 +248,6 @@ function handleTopSearch() {
     if (results.length === 0) {
         dropdown.innerHTML = '<div class="search-item" style="color:#999;text-align:center">Không tìm thấy kết quả</div>';
     } else {
-        // Giới hạn hiển thị 10 kết quả
         results.slice(0, 10).forEach(item => {
             const div = document.createElement('div'); div.className = 'search-item';
             div.innerHTML = `<strong>${item.type==='cam'?'📸':'🏠'} ${escapeHTML(item.name)}</strong><br><small style="color:#666">${item.type==='cam'?'Mục Camera':'Mục Hộ Dân'} ${item.phone?' - '+item.phone:''}</small>`;
@@ -258,7 +268,6 @@ function clearSearch() {
     document.querySelector('.clear-search').style.display = 'none';
 }
 
-// Ẩn dropdown khi click ra ngoài vùng search
 document.addEventListener('click', (e) => {
     if (!document.getElementById('top-search-bar').contains(e.target)) {
         document.getElementById('search-results-dropdown').style.display = 'none';
@@ -294,20 +303,14 @@ function createRow(type, item) {
     return div;
 }
 
-// HÀM BAY ĐẾN & TỰ ĐỘNG MỞ POPUP (Tối ưu Mobile)
 function focusItem(type, id, lat, lng) {
-    // 1. Bay đến vị trí
     map.flyTo([lat, lng], 20);
-    
-    // 2. Thu gọn bảng điều khiển nếu đang ở mobile để không che bản đồ
     if (window.innerWidth <= 768) {
         const sidePanel = document.getElementById('side-panel');
         const gpsBtn = document.querySelector('.gps-button');
         sidePanel.style.height = '15vh';
         if (gpsBtn) gpsBtn.style.bottom = 'calc(15vh + 20px)';
     }
-
-    // 3. Đợi bay xong (400ms) thì bật Popup
     setTimeout(() => {
         if (type === 'camera' && markerRefs.cams[id]) markerRefs.cams[id].openPopup();
         if (type === 'household' && markerRefs.hos[id]) markerRefs.hos[id].openPopup();
@@ -322,10 +325,7 @@ function deleteItem(type, id) {
     }
 }
 
-function saveData() { 
-    localStorage.setItem('bt_data', JSON.stringify(data)); 
-    renderAll(); 
-}
+function saveData() { localStorage.setItem('bt_data', JSON.stringify(data)); renderAll(); }
 
 function showTab(t) {
     document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -358,92 +358,63 @@ function calculateEndPoint(lat, lng, brng, dist) {
 function exportExcel() {
     let csv = "\ufeffLoại,Tên,SĐT,Địa chỉ,Ghi chú,Lat,Lng\n";
     data.hos.forEach(h => csv += `Hộ Dân,${escapeHTML(h.name)},${escapeHTML(h.phone)},"${escapeHTML(h.addr)}","${escapeHTML((h.note||'').replace(/\n/g, ' '))}",${h.lat},${h.lng}\n`);
-    const a = document.createElement('a'); 
-    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); 
-    a.download = "bao_thuan.csv"; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })); a.download = "bao_thuan.csv"; a.click();
 }
-
 function exportJSON() {
-    const a = document.createElement('a'); 
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })); 
-    a.download = "data_backup.json"; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })); a.download = "data_backup.json"; a.click();
 }
-
-// Chức năng Phục hồi (Xóa cũ, đè mới)
 function importJSON(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
             const imported = JSON.parse(e.target.result);
-            if (imported.cams && imported.hos) { 
-                data = imported; saveData(); 
-                alert("Đã phục hồi (Ghi đè) dữ liệu thành công!"); 
-            }
+            if (imported.cams && imported.hos) { data = imported; saveData(); alert("Đã phục hồi (Ghi đè) dữ liệu thành công!"); }
         } catch(err) { alert("File không hợp lệ!"); }
     };
-    if(event.target.files[0]) reader.readAsText(event.target.files[0]);
-    event.target.value = ''; // Reset input
+    if(event.target.files[0]) reader.readAsText(event.target.files[0]); event.target.value = '';
 }
-
-// Chức năng Gộp dữ liệu (Merge)
 function mergeJSON(event) {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
             const imported = JSON.parse(e.target.result);
             let countCam = 0, countHo = 0;
-            
             if (imported.cams) {
                 imported.cams.forEach(newCam => {
-                    // Kiểm tra xem ID hoặc Tọa độ đã tồn tại chưa
-                    if (!data.cams.some(c => c.id === newCam.id || (c.lat === newCam.lat && c.lng === newCam.lng))) {
-                        data.cams.push(newCam); countCam++;
-                    }
+                    if (!data.cams.some(c => c.id === newCam.id || (c.lat === newCam.lat && c.lng === newCam.lng))) { data.cams.push(newCam); countCam++; }
                 });
             }
             if (imported.hos) {
                 imported.hos.forEach(newHo => {
-                    if (!data.hos.some(h => h.id === newHo.id || (h.lat === newHo.lat && h.lng === newHo.lng))) {
-                        data.hos.push(newHo); countHo++;
-                    }
+                    if (!data.hos.some(h => h.id === newHo.id || (h.lat === newHo.lat && h.lng === newHo.lng))) { data.hos.push(newHo); countHo++; }
                 });
             }
-            saveData();
-            alert(`Đã gộp thành công!\n- Thêm mới: ${countCam} Camera.\n- Thêm mới: ${countHo} Hộ dân.`);
+            saveData(); alert(`Đã gộp thành công!\n- Thêm mới: ${countCam} Camera.\n- Thêm mới: ${countHo} Hộ dân.`);
         } catch(err) { alert("Lỗi đọc file JSON!"); }
     };
-    if(event.target.files[0]) reader.readAsText(event.target.files[0]);
-    event.target.value = ''; // Reset
+    if(event.target.files[0]) reader.readAsText(event.target.files[0]); event.target.value = '';
 }
 
-// Khởi chạy vẽ bản đồ lần đầu
 renderAll();
 
 // ==========================================
-// --- 10. LOGIC VUỐT BOTTOM SHEET (Dành cho Mobile) ---
+// --- 10. LOGIC VUỐT BOTTOM SHEET ---
 // ==========================================
 const sidePanel = document.getElementById('side-panel'), dragHandle = document.getElementById('drag-handle'), gpsBtn = document.querySelector('.gps-button');
 let startY = 0, currentHeight = 0, isDragging = false;
 
 dragHandle.addEventListener('touchstart', (e) => {
     if (window.innerWidth > 768) return;
-    startY = e.touches[0].clientY; 
-    currentHeight = sidePanel.getBoundingClientRect().height;
-    
-    // Tắt transition khi đang kéo để mượt theo ngón tay
-    sidePanel.style.transition = 'none'; 
-    if(gpsBtn) gpsBtn.style.transition = 'none';
+    startY = e.touches[0].clientY; currentHeight = sidePanel.getBoundingClientRect().height;
+    sidePanel.style.transition = 'none'; if(gpsBtn) gpsBtn.style.transition = 'none';
     isDragging = true;
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
     let newHeight = currentHeight - (e.touches[0].clientY - startY);
-    
-    // Giới hạn kéo từ 15% đến 85% màn hình
     if (newHeight < window.innerHeight * 0.15) newHeight = window.innerHeight * 0.15;
     if (newHeight > window.innerHeight * 0.85) newHeight = window.innerHeight * 0.85;
-    
     sidePanel.style.height = newHeight + 'px';
     if(gpsBtn) gpsBtn.style.bottom = (newHeight + 20) + 'px';
 }, { passive: true });
@@ -451,18 +422,8 @@ document.addEventListener('touchmove', (e) => {
 document.addEventListener('touchend', () => {
     if (!isDragging) return;
     isDragging = false;
-    
-    // Bật lại transition để chạy animation hút (snap)
-    sidePanel.style.transition = 'height 0.3s ease-out'; 
-    if(gpsBtn) gpsBtn.style.transition = 'bottom 0.3s ease-out';
-    
+    sidePanel.style.transition = 'height 0.3s ease-out'; if(gpsBtn) gpsBtn.style.transition = 'bottom 0.3s ease-out';
     const percent = sidePanel.getBoundingClientRect().height / window.innerHeight;
-    
-    // Các mốc hút: 15% (thấp), 45% (vừa), 85% (cao)
-    let snap = '45vh'; 
-    if (percent < 0.3) snap = '15vh'; 
-    else if (percent > 0.6) snap = '85vh';
-    
-    sidePanel.style.height = snap; 
-    if(gpsBtn) gpsBtn.style.bottom = `calc(${snap} + 20px)`;
+    let snap = '45vh'; if (percent < 0.3) snap = '15vh'; else if (percent > 0.6) snap = '85vh';
+    sidePanel.style.height = snap; if(gpsBtn) gpsBtn.style.bottom = `calc(${snap} + 20px)`;
 });
